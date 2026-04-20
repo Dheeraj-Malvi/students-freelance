@@ -6,11 +6,13 @@ const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(''); // Error handle karne ke liye
   const navigate = useNavigate();
 
   const handleSignup = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMessage(''); // Clear previous errors
 
     // Supabase Auth Signup Function
     const { data, error } = await supabase.auth.signUp({
@@ -19,10 +21,17 @@ const Signup = () => {
     });
 
     if (error) {
-      alert("Signup Error: " + error.message);
+      // alert("Signup Error: " + error.message);
+      setErrorMessage(error.message);
     } else {
-      alert("Signup Successful! Check your email (if confirmation is ON) or Login now.");
-      navigate('/login'); 
+      if (data.user && data.user.identities && data.user.identities.length === 0) {
+        setErrorMessage("This email is already registered, you can login directly!");
+      } else {
+        alert("Signup Successful! Check your email for verification link.");
+        navigate('/login');
+      }
+      // alert("Signup Successful! Check your email (if confirmation is ON) or Login now.");
+      // navigate('/login');
     }
     setLoading(false);
   };
@@ -35,6 +44,13 @@ const Signup = () => {
       <div className="max-w-md w-full bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl">
         <h2 className="text-3xl font-bold text-white text-center mb-2">Create Account</h2>
         <p className="text-slate-500 text-center mb-8">Join the Student Freelance Hub</p>
+
+        {/* ERROR MESSAGE DISPLAY */}
+        {errorMessage && (
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm text-center font-bold animate-pulse">
+            {errorMessage}
+          </div>
+        )}
 
         <form onSubmit={handleSignup} className="space-y-6">
           <div>
@@ -53,7 +69,7 @@ const Signup = () => {
             <input 
               type="password" 
               className="w-full bg-slate-950 border border-slate-800 p-4 rounded-xl text-white outline-none focus:border-blue-500 transition-all"
-              placeholder="Min 6 characters"
+              placeholder="Min 7 characters, A-Z, a-z, 0-9, and !@#$%^&*()"
               onChange={(e) => setPassword(e.target.value)}
               required
             />

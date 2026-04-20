@@ -8,7 +8,6 @@ import { formatDistanceToNow } from 'date-fns';
 
 function App() {
   const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [authLoading, setAuthLoading] = useState(true); 
   const [user, setUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -28,9 +27,7 @@ function App() {
       } catch (err) {
         console.error("Initialization error:", err);
       } finally {
-        // Jab dono kaam ho jayein tabhi loading false karo
         setAuthLoading(false);
-        setLoading(false);
       }
     };
 
@@ -56,7 +53,7 @@ function App() {
     };
   }, []);
 
-  // --- CRITICAL FIX: Jab tak loading hai, kuch aur render mat karo ---
+  // --- LOADING STATE ---
   if (authLoading) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
@@ -105,7 +102,6 @@ function App() {
       </div>
 
       <main className="max-w-7xl mx-auto px-6 pb-24">
-        {/* Is section mein flicker ab nahi aayega kyunki user state ab confirm ho chuki hai */}
         <div className="mb-20">
           {user ? (
             <PostJob onJobAdded={() => {}} />
@@ -120,29 +116,38 @@ function App() {
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredJobs.map((job) => (
-            <div key={job.id} className="relative group">
-              <JobCard
-                title={job.title}
-                category={job.category}
-                price={job.price}
-                rating={job.rating}
-                time={job.created_at ? formatDistanceToNow(new Date(job.created_at), { addSuffix: true }) : "Just now"}
-              />
-              {user && user.id === job.user_id && (
-                <button
-                  onClick={() => handleDelete(job.id)}
-className="absolute top-3 right-3 bg-white/5 backdrop-blur-md text-red-500 hover:text-red-400 p-2 rounded-lg transition-all opacity-100 lg:opacity-0 group-hover:opacity-100 shadow-xl z-30 border border-white/10 hover:border-red-500/50"
-    title="Delete your post"                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
+        {/* Jobs List Logic with "No Results Found" */}
+        {filteredJobs.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredJobs.map((job) => (
+              <div key={job.id} className="relative group">
+                <JobCard
+                  title={job.title}
+                  category={job.category}
+                  price={job.price}
+                  rating={job.rating}
+                  time={job.created_at ? formatDistanceToNow(new Date(job.created_at), { addSuffix: true }) : "Just now"}
+                />
+                {user && user.id === job.user_id && (
+                  <button
+                    onClick={() => handleDelete(job.id)}
+                    className="absolute top-3 right-3 bg-white/5 backdrop-blur-md text-red-500 hover:text-red-400 p-2 rounded-lg transition-all opacity-100 lg:opacity-0 group-hover:opacity-100 shadow-xl z-30 border border-white/10 hover:border-red-500/50"
+                    title="Delete your post"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1-1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-20">
+            <h3 className="text-2xl font-bold">No results found for "{searchTerm}"</h3>
+            <p className="text-slate-500 mt-2">Bhai, kuch aur search karke dekho!</p>
+          </div>
+        )}
       </main>
     </div>
   );
