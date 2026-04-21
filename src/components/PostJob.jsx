@@ -27,7 +27,7 @@ const PostJob = ({ onJobAdded }) => {
           category: formData.category, 
           price: formData.price,
           rating: "5.0",
-          time_posted: "Just now",
+          // time_posted: "Just now",
           user_id: user.id // <-- Sabse important change
         }]);
 

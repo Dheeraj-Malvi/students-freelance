@@ -4,7 +4,6 @@ import JobCard from './components/JobCard';
 import { supabase } from './lib/supabaseClient';
 import PostJob from './components/PostJob';
 import { Link } from 'react-router-dom';
-import { formatDistanceToNow } from 'date-fns';
 
 function App() {
   const [jobs, setJobs] = useState([]);
@@ -106,14 +105,36 @@ function App() {
           {user ? (
             <PostJob onJobAdded={() => {}} />
           ) : (
-            <div className="max-w-2xl mx-auto bg-slate-900/40 backdrop-blur-sm border border-slate-800 p-10 rounded-[2.5rem] text-center shadow-2xl">
-              <h3 className="text-2xl font-bold mb-3">Ready to hire? 🚀</h3>
-              <p className="text-slate-400 mb-8">Log in to post your requirements.</p>
-              <Link to="/login" className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-2xl font-black transition-all">
-                Login to Post
-              </Link>
-            </div>
-          )}
+<div className="max-w-2xl mx-auto bg-slate-900/40 backdrop-blur-md border border-white/[0.05] p-10 rounded-[2.5rem] text-center shadow-2xl relative overflow-hidden group/card">
+  {/* Subtle Background Glow for the card */}
+  <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/10 blur-[80px] pointer-events-none"></div>
+
+  <h3 className="text-3xl font-black mb-3 text-white tracking-tighter italic">Ready to hire? 🚀</h3>
+  <p className="text-slate-400 mb-8 font-medium italic">Log in to post your requirements and find the best student talent.</p>
+  
+  {/* LIQUID GLASS BUTTON */}
+  <Link 
+    to="/login" 
+    className="inline-block relative group overflow-hidden px-12 py-4 rounded-xl transition-all duration-300 active:scale-95
+      /* Glass Effect Base */
+      bg-blue-600/20 backdrop-blur-md 
+      /* Borders */
+      border border-blue-500/30 border-t-blue-400/50
+      /* Text Color */
+      text-blue-400 hover:text-white font-black uppercase tracking-widest text-xs
+      /* Shadow & Glow */
+      shadow-[0_0_20px_rgba(37,99,235,0.1)]
+      hover:shadow-[0_0_30px_rgba(37,99,235,0.3)]
+      hover:bg-blue-600/40"
+  >
+    {/* Glass Shine Animation Layer */}
+    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
+
+    <span className="relative z-10">
+      Login to Post
+    </span>
+  </Link>
+</div>          )}
         </div>
 
         {/* Jobs List Logic with "No Results Found" */}
@@ -126,7 +147,7 @@ function App() {
                   category={job.category}
                   price={job.price}
                   rating={job.rating}
-                  time={job.created_at ? formatDistanceToNow(new Date(job.created_at), { addSuffix: true }) : "Just now"}
+                  created_at={job.created_at}
                 />
                 {user && user.id === job.user_id && (
                   <button
@@ -145,7 +166,7 @@ function App() {
         ) : (
           <div className="text-center py-20">
             <h3 className="text-2xl font-bold">No results found for "{searchTerm}"</h3>
-            <p className="text-slate-500 mt-2">Bhai, kuch aur search karke dekho!</p>
+            <p className="text-slate-500 mt-2">Search something else!</p>
           </div>
         )}
       </main>
