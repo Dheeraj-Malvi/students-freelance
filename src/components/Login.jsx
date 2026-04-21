@@ -36,38 +36,50 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4">
       {/* Back Button - Clean design */}
-<Link 
-  to="/" 
-  className="absolute top-8 left-8 group flex items-center gap-2 px-4 py-2 rounded-full 
+      <Link
+        to="/"
+        className="absolute top-8 left-8 group flex items-center gap-2 px-4 py-2 rounded-full 
     /* Glass Effect */
     bg-slate-900/40 backdrop-blur-md border border-slate-800 hover:border-slate-700
     /* Text Styling */
     text-slate-400 hover:text-white text-xs font-black uppercase tracking-widest 
     /* Transition & Animation */
     transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,255,255,0.05)] overflow-hidden"
->
-  {/* Subtle Shimmer for the Back Button */}
-  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
+      >
+        {/* Subtle Shimmer for the Back Button */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
 
-  {/* Arrow Icon with a little nudge animation */}
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    fill="none" viewBox="0 0 24 24" 
-    strokeWidth={2.5} 
-    stroke="currentColor" 
-    className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1"
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-  </svg>
-  
-  <span className="relative z-10">Back to Home</span>
-</Link>
-      <div className="max-w-md w-full bg-slate-900 border border-slate-800 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden">
+        {/* Arrow Icon with a little nudge animation */}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none" viewBox="0 0 24 24"
+          strokeWidth={2.5}
+          stroke="currentColor"
+          className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+        </svg>
+
+        <span className="relative z-10">Back to Home</span>
+      </Link>
+
+      {/* --- 2. SIGN UP CARD WRAPPER --- */}
+      <div className="relative group w-full max-w-md">
+        
+        {/* Outer Glow Effect (Chamakti hui border) */}
+        <div className="absolute -inset-1 bg-gradient-to-r from-emerald-600 to-blue-600 rounded-[2rem] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+
+        {/* Main Card Content */}
+        <div className="relative bg-slate-900/90 backdrop-blur-2xl border border-white/10 p-8 rounded-[2rem] shadow-2xl">
+          <h2 className="text-3xl font-bold text-white text-center mb-2">Welcome Back</h2>
+          <p className="text-slate-500 text-center mb-8">Login to your Student Gig account</p>
+
+      {/* <div className="max-w-md w-full bg-slate-900 border border-slate-800 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden"> */}
         {/* Subtle Liquid Glow */}
-        <div className="absolute -top-24 -left-24 w-48 h-48 bg-blue-500/10 blur-[80px]"></div>
+        {/* <div className="absolute -top-24 -left-24 w-48 h-48 bg-blue-500/10 blur-[80px]"></div>
 
         <h2 className="text-3xl font-black text-white text-center mb-2 tracking-tight">Welcome Back</h2>
-        <p className="text-slate-500 text-center mb-8 font-medium italic">Login to your Student Gig account</p>
+        <p className="text-slate-500 text-center mb-8 font-medium italic">Login to your Student Gig account</p> */}
 
         {/* ERROR MESSAGE (No more annoying alerts) */}
         {errorMessage && (
@@ -144,13 +156,21 @@ const Login = () => {
             </span>
           </button>
         </form>
+        <div className="flex justify-end my-4">
+          <Link to="/forgot-password"
+            className="text-xs text-blue-400 hover:text-blue-300 hover:underline transition-colors"
+          >
+            Forgot Password?
+          </Link>
+        </div>
 
         <p className="text-center text-slate-500 mt-8 text-sm font-medium">
           New here?{' '}
-          <Link to="/signup" className="text-emerald-400 hover:text-emerald-300 font-black transition-colors ml-1">
+          <Link to="/signup" className="text-emerald-400 hover:text-emerald-300 hover:underline font-black transition-colors ml-1">
             Create an account
           </Link>
         </p>
+      </div>
       </div>
     </div>
   );
