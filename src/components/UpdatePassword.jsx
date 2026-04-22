@@ -41,7 +41,7 @@ const UpdatePassword = () => {
         const { error } = await supabase.auth.updateUser({ password });
 
         if (error) {
-            setMessage(`Galti: ${error.message}`);
+            setMessage(`${error.message}`);
             setStatus('error');
         } else {
             setMessage('Password updated successfully! Redirecting to login...');
@@ -89,7 +89,7 @@ const UpdatePassword = () => {
                                     <Lock className="absolute left-4 w-5 h-5 text-slate-500" />
                                     <input
                                         type={showPassword ? "text" : "password"}
-                                        placeholder="Min 6 characters"
+                                        placeholder="Min 7 characters"
                                         className="w-full bg-slate-950/50 border border-white/10 rounded-2xl py-4 pl-12 pr-12 text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
