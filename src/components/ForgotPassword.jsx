@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { Mail, ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const handleReset = async (e) => {
     e.preventDefault();
@@ -27,10 +27,10 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6 flex flex-col items-center justify-center relative">
+    <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4 relative overflow-hidden">
 
-<button 
-  onClick={() => navigate('/')} 
+<Link 
+  to="/" 
   className="absolute top-8 left-8 group overflow-hidden px-5 py-2.5 rounded-full transition-all duration-300 active:scale-95 z-20
     /* Glass Effect Base */
     bg-white/5 backdrop-blur-md 
@@ -42,18 +42,16 @@ const ForgotPassword = () => {
     hover:shadow-[0_0_20px_rgba(255,255,255,0.05)]
     hover:bg-white/10"
 >
-  {/* Liquid Glass Shine Animation (The Shimmer) */}
+  {/* Liquid Glass Shine Animation */}
   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
 
   <span className="relative z-10 flex items-center gap-2">
-    {/* Arrow Icon with nudge animation */}
     <ArrowLeft className="w-3.5 h-3.5 transition-transform duration-300 group-hover:-translate-x-1" />
     Back to Home
   </span>
-</button>
-
+</Link>
       {/* --- 1. BACK TO HOME BUTTON (Top Left) --- */}
-   
+
       {/* <button
         onClick={() => navigate('/')}
         className="absolute top-8 left-8 flex items-center text-slate-400 hover:text-white transition-all group"

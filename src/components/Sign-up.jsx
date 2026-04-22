@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 
 const Signup = () => {
   const [email, setEmail] = useState('');
@@ -41,13 +42,25 @@ const Signup = () => {
       {/* Back to Home Button */}
       <Link
         to="/"
-        className="absolute top-8 left-8 group flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/40 backdrop-blur-md border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white text-xs font-black uppercase tracking-widest transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,255,255,0.05)] overflow-hidden z-20"
+        className="absolute top-8 left-8 group overflow-hidden px-5 py-2.5 rounded-full transition-all duration-300 active:scale-95 z-20
+    /* Glass Effect Base */
+    bg-white/5 backdrop-blur-md 
+    /* Borders: Liquid Shine */
+    border border-white/10 border-t-white/20
+    /* Text Styling */
+    text-slate-400 hover:text-white font-black uppercase tracking-widest text-[10px]
+    /* Shadow & Glow */
+    hover:shadow-[0_0_20px_rgba(255,255,255,0.05)]
+    hover:bg-white/10"
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-        </svg>
-        <span className="relative z-10">Back to Home</span>
+        {/* Subtle Shimmer for the Back Button */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
+
+        {/* Arrow Icon with a little nudge animation */}
+        <span className="relative z-10 flex items-center gap-2">
+          <ArrowLeft className="w-3.5 h-3.5 transition-transform duration-300 group-hover:-translate-x-1" />
+          Back to Home
+        </span>
       </Link>
 
       {/* --- 2. SIGN UP CARD WRAPPER --- */}
