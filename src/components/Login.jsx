@@ -16,9 +16,10 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setErrorMessage(''); // Purane errors saaf karo
+    setErrorMessage(''); 
 
-    const { error } = await supabase.auth.signInWithPassword({
+    // 1. SIGN IN
+    const {data, error } = await supabase.auth.signInWithPassword({
       email: email,
       password: password
     });
@@ -30,10 +31,36 @@ const Login = () => {
           ? "Email or Password is incorrect."
           : error.message
       );
-    } else {
-      navigate('/');
+      setLoading(false);
+      return;
+
     }
-    setLoading(false);
+
+    // 2. SUCCESS! (Important: Yahan 'data.user' use karenge)
+    if (data?.user) {
+      try {
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', data.user.id)
+          .maybeSingle();
+
+        if (profileError) throw profileError;
+
+        // 3. REDIRECT LOGIC
+        if (profile) {
+          console.log("Profile found, going home");
+          navigate('/dashboard', { replace: true });
+        } else {
+          console.log("No profile found, going to setup");
+          navigate('/profilesetup', { replace: true }); 
+        }
+      } catch (err) {
+        console.error("Profile check failed:", err);
+        // Fallback: Agar error aaye toh safety ke liye setup par bhejo
+        navigate('/profilesetup');
+      }
+    };
   };
 
   return (
@@ -113,13 +140,13 @@ const Login = () => {
                 />
 
                 {/* SMOOTH EYE BUTTON */}
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 text-slate-500 hover:text-blue-400 transition-colors"
-                  >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 text-slate-500 hover:text-blue-400 transition-colors"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
               </div>
             </div>
 
