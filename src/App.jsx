@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 
 function App() {
   const [jobs, setJobs] = useState([]);
-  const [authLoading, setAuthLoading] = useState(true); 
+  const [authLoading, setAuthLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -77,19 +77,19 @@ function App() {
   return (
     <div className="min-h-screen bg-slate-950 text-white selection:bg-blue-500/30">
       <Navbar />
-      
+
       <div className="pt-24 pb-16 px-6 text-center relative overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-500/10 via-transparent to-transparent -z-10"></div>
         <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tighter">
           Find the perfect <br />
           <span className="bg-gradient-to-r from-blue-400 via-emerald-400 to-blue-500 bg-clip-text text-transparent italic">Student Gig</span>
         </h1>
-        
+
         <div className="max-w-3xl mx-auto relative group mb-12 mt-10">
           <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-emerald-600 rounded-[1.8rem] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
           <div className="relative flex items-center bg-slate-900 border border-slate-800 p-2 rounded-[1.6rem]">
             <span className="pl-6">🔍</span>
-            <input 
+            <input
               type="text"
               placeholder="Search gigs..."
               className="w-full bg-transparent border-none p-4 outline-none font-medium"
@@ -103,19 +103,19 @@ function App() {
       <main className="max-w-7xl mx-auto px-6 pb-24">
         <div className="mb-20">
           {user ? (
-            <PostJob onJobAdded={() => {}} />
+            <PostJob onJobAdded={() => { }} />
           ) : (
-<div className="max-w-2xl mx-auto bg-slate-900/40 backdrop-blur-md border border-white/[0.05] p-10 rounded-[2.5rem] text-center shadow-2xl relative overflow-hidden group/card">
-  {/* Subtle Background Glow for the card */}
-  <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/10 blur-[80px] pointer-events-none"></div>
+            <div className="max-w-2xl mx-auto bg-slate-900/40 backdrop-blur-md border border-white/[0.05] p-10 rounded-[2.5rem] text-center shadow-2xl relative overflow-hidden group/card">
+              {/* Subtle Background Glow for the card */}
+              <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/10 blur-[80px] pointer-events-none"></div>
 
-  <h3 className="text-3xl font-black mb-3 text-white tracking-tighter italic">Ready to hire? 🚀</h3>
-  <p className="text-slate-400 mb-8 font-medium italic">Log in to post your requirements and find the best student talent.</p>
-  
-  {/* LIQUID GLASS BUTTON */}
-  <Link 
-    to="/login" 
-    className="inline-block relative group overflow-hidden px-12 py-4 rounded-xl transition-all duration-300 active:scale-95
+              <h3 className="text-3xl font-black mb-3 text-white tracking-tighter italic">Ready to hire? 🚀</h3>
+              <p className="text-slate-400 mb-8 font-medium italic">Log in to post your requirements and find the best student talent.</p>
+
+              {/* LIQUID GLASS BUTTON */}
+              <Link
+                to="/login"
+                className="inline-block relative group overflow-hidden px-12 py-4 rounded-xl transition-all duration-300 active:scale-95
       /* Glass Effect Base */
       bg-blue-600/20 backdrop-blur-md 
       /* Borders */
@@ -126,15 +126,15 @@ function App() {
       shadow-[0_0_20px_rgba(37,99,235,0.1)]
       hover:shadow-[0_0_30px_rgba(37,99,235,0.3)]
       hover:bg-blue-600/40"
-  >
-    {/* Glass Shine Animation Layer */}
-    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
+              >
+                {/* Glass Shine Animation Layer */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
 
-    <span className="relative z-10">
-      Login to Post
-    </span>
-  </Link>
-</div>          )}
+                <span className="relative z-10">
+                  Login to Post
+                </span>
+              </Link>
+            </div>)}
         </div>
 
         {/* Jobs List Logic with "No Results Found" */}

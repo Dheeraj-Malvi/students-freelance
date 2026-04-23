@@ -11,6 +11,7 @@ const Signup = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [role, setRole] = useState('student');
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -20,6 +21,12 @@ const Signup = () => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: 'http://localhost:5173/profilesetup', // redirect after email verification
+        data: {
+          role: role, // Ye metadata mein save ho jayega
+        }
+      }
     });
 
     if (error) {
@@ -28,9 +35,8 @@ const Signup = () => {
       if (data.user && data.user.identities && data.user.identities.length === 0) {
         setErrorMessage("This email is already registered, you can login directly!");
       } else {
-        setSuccessMessage("Signup Successful! Check your email for verification link.");
+        setSuccessMessage("Signup Successful! Check your email for account verification. Redirecting to Login...");
         setTimeout(() => navigate('/login'), 5000);
-        // navigate('/login');
       }
     }
     setLoading(false);
@@ -38,7 +44,7 @@ const Signup = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4 relative overflow-hidden">
-      
+
       {/* Back to Home Button */}
       <Link
         to="/"
@@ -65,7 +71,7 @@ const Signup = () => {
 
       {/* --- 2. SIGN UP CARD WRAPPER --- */}
       <div className="relative group w-full max-w-md">
-        
+
         {/* Outer Glow Effect (Chamakti hui border) */}
         <div className="absolute -inset-1 bg-gradient-to-r from-emerald-600 to-blue-600 rounded-[2rem] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
 
@@ -87,6 +93,26 @@ const Signup = () => {
 
           <form onSubmit={handleSignup} className="space-y-6">
             <div>
+              <div className="space-y-3 mb-6">
+                <label className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] ml-1">
+                  I want to join as a
+                </label>
+                <div className="flex gap-3">
+                  {['student', 'client'].map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => setRole(r)}
+                      className={`flex-1 py-3 rounded-2xl border transition-all duration-300 capitalize font-bold text-xs tracking-widest ${role === r
+                          ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.1)]'
+                          : 'bg-slate-950/50 border-white/5 text-slate-500 hover:border-white/10'
+                        }`}
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <label className="text-slate-400 text-sm block mb-2">Email Address</label>
               <input
                 type="email"
