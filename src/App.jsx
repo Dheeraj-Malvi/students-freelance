@@ -75,17 +75,17 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white selection:bg-blue-500/30">
+    <div className="min-h-screen bg-slate-950 text-white selection:bg-blue-500/30 overflow-x-hidden">
       <Navbar />
 
       <div className="pt-24 pb-16 px-6 text-center relative overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-500/10 via-transparent to-transparent -z-10"></div>
-        <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tighter">
+        <h1 className="text-4xl sm:text-5xl md:text-7xl font-black mb-6 tracking-tighter leading-tight px-2">
           Find the perfect <br />
           <span className="bg-gradient-to-r from-blue-400 via-emerald-400 to-blue-500 bg-clip-text text-transparent italic">Student Gig</span>
         </h1>
 
-        <div className="max-w-3xl mx-auto relative group mb-12 mt-10">
+        <div className="w-full max-w-3xl mx-auto relative group mb-12 mt-10 px-2">
           <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-emerald-600 rounded-[1.8rem] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
           <div className="relative flex items-center bg-slate-900 border border-slate-800 p-2 rounded-[1.6rem]">
             <span className="pl-6">🔍</span>

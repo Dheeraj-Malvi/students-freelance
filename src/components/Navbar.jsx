@@ -24,7 +24,7 @@ const Navbar = () => {
   return (
     <div className="fixed top-0 left-0 right-0 z-50 px-4 pt-6">
       {/* Container with extra backdrop-blur and thin gloss border */}
-      <nav className="max-w-7xl mx-auto bg-slate-900/40 backdrop-blur-[20px] border border-white/[0.08] px-6 py-3 flex items-center justify-between rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden relative group">
+      <nav className="fixed top-4 left-1/2 -translate-x-1/2 w-[94%] max-w-7xl z-50 mx-auto bg-slate-900/40 backdrop-blur-[20px] border border-white/[0.08] px-3 md:px-6 py-2.5 flex items-center justify-between rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden group">
         
         {/* Subtle animated background glow */}
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-transparent to-emerald-500/10 pointer-events-none group-hover:opacity-100 transition-opacity opacity-50"></div>
