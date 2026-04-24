@@ -130,8 +130,10 @@ const Dashboard = () => {
                                     <div className="absolute right-0 mt-3 w-48 bg-slate-900 border border-white/10 rounded-2xl shadow-2xl p-4 z-20">
                                         <div className="mb-3 border-b border-white/5 pb-3">
                                             <p className="text-xs font-black text-white truncate uppercase">{user?.user_metadata?.full_name || "USER"}</p>
-                                            <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest mt-1">(user?.user_metadata?.role || "USER")</p>
+                                            <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest mt-1">{user?.user_metadata?.role || "USER"}</p>
                                         </div>
+
+                                      
                                         <button className="flex items-center gap-2 text-[10px] text-slate-400 hover:text-white font-bold uppercase w-full py-2">
                                             <UserCircle size={14} /> My Profile
                                         </button>
