@@ -64,12 +64,12 @@ const Navbar = () => {
   </div>
 
   {/* Name: Freelance Students (Keeping this same) */}
-  <span className="text-xl md:text-2xl font-black tracking-tighter italic">
-    <span className="text-white">Freelance</span>
-    <span className="bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent ml-1.5">
-      Students
+<span className="text-sm sm:text-xl md:text-2xl font-black tracking-tighter italic whitespace-nowrap">
+      <span className="text-white">Freelance</span>
+      <span className="bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent ml-1.5">
+        Students
+      </span>
     </span>
-  </span>
 </Link>
         {/* <Link to="/" className="relative z-10 text-xl md:text-2xl font-black bg-gradient-to-br from-white via-blue-400 to-emerald-400 bg-clip-text text-transparent tracking-tighter italic">
           StudentFreelanceHub
@@ -113,7 +113,7 @@ const Navbar = () => {
                 <div className="absolute inset-0 opacity-0 group-hover/btn:opacity-100 bg-blue-400/10 blur-xl transition-opacity"></div>
                 
                 <span className="relative z-10 text-blue-400 group-hover/btn:text-white text-[10px] font-black uppercase tracking-[0.2em]">
-                  Join now
+                  Join
                 </span>
               </Link>
             </div>
