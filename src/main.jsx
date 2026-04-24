@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { Routes, Route, HashRouter } from 'react-router-dom'
 import App from './App.jsx'
 import Login from './components/Login.jsx'
 import './index.css'
@@ -13,7 +13,7 @@ import { AuthProvider } from './context/AuthProvider.jsx'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter>
+    <HashRouter>
       <AuthProvider>
         <Routes>
           <Route path="/" element={<App />} />
@@ -29,6 +29,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             </div>} />
         </Routes>
       </AuthProvider>
-    </BrowserRouter>
+    </HashRouter>
   </React.StrictMode>,
 )
