@@ -22,7 +22,7 @@ const Signup = () => {
       email,
       password,
       options: {
-        emailRedirectTo: 'http://localhost:5173/profilesetup', // redirect after email verification
+        emailRedirectTo: window.location.origin + '/students-freelance/', // redirect after email verification
         data: {
           role: role, // Ye metadata mein save ho jayega
         }
