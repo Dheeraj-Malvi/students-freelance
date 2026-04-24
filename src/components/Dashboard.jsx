@@ -129,8 +129,8 @@ const Dashboard = () => {
                                     <div className="fixed inset-0 z-10" onClick={() => setIsProfileOpen(false)}></div>
                                     <div className="absolute right-0 mt-3 w-48 bg-slate-900 border border-white/10 rounded-2xl shadow-2xl p-4 z-20">
                                         <div className="mb-3 border-b border-white/5 pb-3">
-                                            <p className="text-xs font-black text-white truncate uppercase">{user?.user_metadata?.full_name || "DHEERAJ"}</p>
-                                            <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest mt-1">Student</p>
+                                            <p className="text-xs font-black text-white truncate uppercase">{user?.user_metadata?.full_name || "USER"}</p>
+                                            <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest mt-1">(user?.user_metadata?.role || "USER")</p>
                                         </div>
                                         <button className="flex items-center gap-2 text-[10px] text-slate-400 hover:text-white font-bold uppercase w-full py-2">
                                             <UserCircle size={14} /> My Profile
@@ -148,7 +148,7 @@ const Dashboard = () => {
                 {/* Dashboard Body */}
                 <div className="p-4 md:p-8 overflow-y-auto">
                     <h2 className="text-xl md:text-2xl font-bold text-white mb-6">
-                        Welcome back, <span className="text-blue-400 uppercase">{user?.user_metadata?.full_name?.split(' ')[0] || "DHEERAJ"}</span> ! 👋
+                        Welcome back, <span className="text-blue-400 uppercase">{user?.user_metadata?.full_name?.split(' ')[0] || "USER"}</span> ! 👋
                     </h2>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
