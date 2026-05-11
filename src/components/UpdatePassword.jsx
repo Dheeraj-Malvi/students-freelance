@@ -15,19 +15,22 @@ const UpdatePassword = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const checkSession = async () => {
-            const { data } = await supabase.auth.getSession();
-            const urlParams = new URLSearchParams(window.location.hash.replace('#', '?'));
-            const error = urlParams.get('error');
+const checkRecovery = async () => {
+        // Supabase automatic session handle kar leta hai reset link par
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        // HashRouter mein recovery token detect karne ka desi tarika
+        const isRecovery = window.location.hash.includes('type=recovery') || session;
 
-            if (!data.session || error) {
-                setIsAuthorized(false);
-                setMessage("Access denied, request a reset link first.");
-                setStatus('error');
-                setTimeout(() => navigate('/forgot-password'), 4000);
-            }
-        };
-        checkSession();
+        if (!isRecovery) {
+            setIsAuthorized(false);
+            setMessage("Invalid link. Please request a new reset link.");
+            setTimeout(() => navigate('/forgot-password'), 3000);
+        } else {
+            setIsAuthorized(true);
+        }
+    };
+    checkRecovery();
     }, [navigate]);
 
     const handleUpdate = async (e) => {

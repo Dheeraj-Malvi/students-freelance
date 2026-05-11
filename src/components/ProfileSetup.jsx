@@ -1,31 +1,41 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { User, Briefcase, FileText, Camera, CheckCircle, ChevronDown } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
 
 const ProfileSetup = () => {
+    const { user } = useOutletContext();
     const [fullName, setFullName] = useState('');
     const [bio, setBio] = useState('');
     const [role, setRole] = useState('student'); // Default from your table
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const navigate = useNavigate();
-    
+
     const [avatarFile, setAvatarFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
 
+        useEffect(() => {
+        // User metadata se role uthana (If available)
+        if (user?.user_metadata?.role) {
+            setRole(user.user_metadata.role);
+        }
+    }, [user]);
 
-    useEffect(() => {
-        const fetchUserRole = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user?.user_metadata?.role) {
-                setRole(user.user_metadata.role); // set role from metadata if available
-            }
-        };
-        fetchUserRole();
-    }, []);
+    
+    if (!user) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin"></div>
+                    <p className="text-slate-400 font-bold tracking-widest text-xs uppercase">Verifying Session...</p>
+                </div>
+            </div>
+        );
+    }
+
 
     // 🔥 Handle Image Selection
     const handleImageChange = (e) => {
@@ -46,12 +56,13 @@ const ProfileSetup = () => {
         setMessage('');
 
         if (fullName.trim().length < 3) {
-        setMessage("Name should be at least 3 characters long.");
-        return;
-    }
+            setMessage("Name should be at least 3 characters long.");
+            setLoading(false);
+            return;
+        }
         try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error("No user found!");
+            // const { data: { user } } = await supabase.auth.getUser();
+            // if (!user) throw new Error("No user found!");
 
             let avatarUrl = user.user_metadata?.avatar_url || "";
             // 1. Upload to Supabase Storage (if file selected)
@@ -69,7 +80,7 @@ const ProfileSetup = () => {
                 const { data: { publicUrl } } = supabase.storage
                     .from('avatars')
                     .getPublicUrl(filePath);
-                
+
                 avatarUrl = publicUrl;
             }
             // 2. Database 'profiles' table update
@@ -89,6 +100,7 @@ const ProfileSetup = () => {
                 data: {
                     full_name: fullName,
                     avatar_url: avatarUrl,
+                    role: role,
                     setup_complete: true
                 }
             });
@@ -132,7 +144,7 @@ const ProfileSetup = () => {
 
                 <div className="relative bg-slate-900/90 backdrop-blur-2xl border border-white/10 p-7 rounded-[2rem] shadow-2xl">
                     {/* Camera/Avatar Placeholder */}
-{/* 🔥 Updated Avatar Selection UI */}
+                    {/* 🔥 Updated Avatar Selection UI */}
                     <div className="relative w-24 h-24 mx-auto mb-6 group/avatar">
                         <label className="cursor-pointer block w-full h-full">
                             <div className="w-full h-full bg-slate-800 rounded-3xl flex items-center justify-center border-2 border-dashed border-white/10 group-hover/avatar:border-emerald-500/50 transition-all overflow-hidden">
@@ -141,16 +153,16 @@ const ProfileSetup = () => {
                                 ) : (
                                     <User className="text-slate-500 group-hover/avatar:text-emerald-500 transition-colors" size={32} />
                                 )}
-                                
+
                                 <div className="absolute inset-0 bg-slate-900/60 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
                                     <Camera className="text-white" size={24} />
                                 </div>
                             </div>
-                            <input 
-                                type="file" 
-                                accept="image/*" 
-                                className="hidden" 
-                                onChange={handleImageChange} 
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleImageChange}
                             />
                         </label>
                     </div>
@@ -159,8 +171,8 @@ const ProfileSetup = () => {
 
                     {message && (
                         <div className={`mb-6 p-4 rounded-xl border text-xs font-bold text-center transition-all ${message.includes('Error')
-                                ? 'bg-red-500/10 border-red-500/20 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.1)]' // Red for Error
-                                : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]' // Green for Success
+                            ? 'bg-red-500/10 border-red-500/20 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.1)]' // Red for Error
+                            : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]' // Green for Success
                             }`}>
                             {message}
                         </div>
@@ -169,7 +181,7 @@ const ProfileSetup = () => {
                     <form onSubmit={handleProfileUpdate} className="space-y-4 text-left">
 
                         {/* ROLE TOGGLE - Small & Sleek */}
-                        {/* <div className="space-y-1.5">
+                        <div className="space-y-1.5">
                             <label className="text-slate-400 text-[10px] font-black uppercase tracking-widest ml-1">I am a...</label>
                             <div className="grid grid-cols-2 gap-3">
                                 {['student', 'client'].map((r) => (
@@ -186,7 +198,7 @@ const ProfileSetup = () => {
                                     </button>
                                 ))}
                             </div>
-                        </div> */}
+                        </div>
 
                         <div className="space-y-1.5">
                             <label className="text-slate-400 text-[10px] font-black uppercase tracking-widest ml-1">Full Name</label>
@@ -195,7 +207,7 @@ const ProfileSetup = () => {
                                 <input
                                     type="text"
                                     placeholder="Enter your name"
-                                    minLength={3}   
+                                    minLength={3}
                                     className="w-full uppercase bg-slate-950/50 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-emerald-500/50 transition-all"
                                     value={fullName}
                                     onChange={(e) => setFullName(e.target.value)}
