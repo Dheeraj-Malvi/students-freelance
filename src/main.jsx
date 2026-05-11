@@ -1,34 +1,62 @@
+// import React from 'react'
+// import ReactDOM from 'react-dom/client'
+// import { Routes, Route, HashRouter } from 'react-router-dom'
+// import App from './App.jsx'
+// import Login from './components/Login.jsx'
+// import './index.css'
+// import Signup from './components/Sign-up.jsx'
+// import ForgotPassword from './components/ForgotPassword.jsx'
+// import UpdatePassword from './components/UpdatePassword.jsx'
+// import ProfileSetup from './components/ProfileSetup.jsx'
+// import Dashboard from './components/Dashboard.jsx'
+// import { AuthProvider } from './context/AuthProvider.jsx'
+
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { Routes, Route, HashRouter } from 'react-router-dom'
+import { Routes, Route, BrowserRouter } from 'react-router-dom'
 import App from './App.jsx'
+import Home from './components/Home.jsx' // Home ko alag karo
 import Login from './components/Login.jsx'
-import './index.css'
 import Signup from './components/Sign-up.jsx'
 import ForgotPassword from './components/ForgotPassword.jsx'
 import UpdatePassword from './components/UpdatePassword.jsx'
 import ProfileSetup from './components/ProfileSetup.jsx'
 import Dashboard from './components/Dashboard.jsx'
 import { AuthProvider } from './context/AuthProvider.jsx'
+import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <HashRouter>
+    <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<App />} />
+          <Route path="/" element={<App />}>
+            <Route index element={<Home />} /> {/* Base path par Home dikhega */}
+            <Route path="login" element={<Login />} />
+            <Route path="signup" element={<Signup />} />
+            <Route path="forgot-password" element={<ForgotPassword />} />
+            <Route path="update-password" element={<UpdatePassword />} />
+            <Route path="profilesetup" element={<ProfileSetup />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="*" element={
+              <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white text-2xl font-bold">
+                404 - Page Not Found
+              </div>} />
+          </Route>
+          
+          {/* <Route path="/" element={<App />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path='/update-password' element={<UpdatePassword />} />
           <Route path="/profilesetup" element={<ProfileSetup />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="*" element={
+          <Route path="/dashboard" element={<Dashboard />} /> */}
+          {/* <Route path="*" element={
             <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white text-2xl font-bold">
               404 - Page Not Found
-            </div>} />
+            </div>} /> */}
         </Routes>
       </AuthProvider>
-    </HashRouter>
+    </BrowserRouter>
   </React.StrictMode>,
 )
