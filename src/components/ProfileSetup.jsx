@@ -114,12 +114,7 @@ const ProfileSetup = () => {
 
             setMessage('Profile setup complete! Taking you to the Dashboard.');
             setTimeout(() => {
-                // will navigate based on role (student/client)
-                if (role === 'student') {
-                    navigate('/student-home'); // Student ke dashboard ka path
-                } else {
-                    navigate('/client-home');  // Client ke dashboard ka path
-                }
+                navigate('/dashboard');
             }, 2000);
         } catch (error) {
             setMessage(`Error: ${error.message}`);
