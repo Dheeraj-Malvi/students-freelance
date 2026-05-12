@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { X, Briefcase } from 'lucide-react'; // Icons ke liye
 
-const PostJob = ({ onJobAdded }) => {
+const PostJob = ({ isOpen, onClose, onJobAdded }) => {
   const [formData, setFormData] = useState({ title: '', category: 'Web Dev', price: '' });
   const [isPosting, setIsPosting] = useState(false);
+
+  // Agar modal open nahi hai toh kuch return mat karo
+  if (!isOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsPosting(true);
 
     try {
-      // 1. Current logged-in user ki details nikalna zaroori hai
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
@@ -19,7 +22,6 @@ const PostJob = ({ onJobAdded }) => {
         return;
       }
 
-      // 2. Insert karte waqt 'user_id' bhej rahe hain taaki RLS policy pass ho jaye
       const { error } = await supabase
         .from('jobs')
         .insert([{ 
@@ -27,17 +29,15 @@ const PostJob = ({ onJobAdded }) => {
           category: formData.category, 
           price: formData.price,
           rating: "5.0",
-          // time_posted: "Just now",
-          user_id: user.id // <-- Sabse important change
+          user_id: user.id 
         }]);
 
-      if (error) {
-        throw error;
-      } else {
-        alert("Gig Posted Successfully! 🚀");
-        setFormData({ title: '', category: 'Web Dev', price: '' });
-        onJobAdded(); // Refresh the list
-      }
+      if (error) throw error;
+
+      alert("Gig Posted Successfully! 🚀");
+      setFormData({ title: '', category: 'Web Dev', price: '' });
+      onJobAdded(); // Refresh list
+      onClose();   // Modal band karo
     } catch (error) {
       alert("Error: " + error.message);
     } finally {
@@ -46,26 +46,45 @@ const PostJob = ({ onJobAdded }) => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto mb-16">
-      <form 
-        onSubmit={handleSubmit} 
-        className="bg-slate-900/50 backdrop-blur-md p-8 rounded-[2.5rem] border border-slate-800 shadow-2xl relative overflow-hidden"
+    // OVERLAY: Bahar click karne par 'onClose' trigger hoga
+    <div 
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
+      onClick={onClose}
+    >
+      {/* MODAL CONTENT: stopPropagation taaki andar click karne par band na ho */}
+      <div 
+        className="bg-[#0B0F1A]/95 border border-white/10 w-full max-w-lg rounded-[2.5rem] p-8 shadow-2xl relative backdrop-blur-xl transition-all scale-100"
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Glow effect for UI */}
-        <div className="absolute -top-10 -left-10 w-32 h-32 bg-blue-600/10 blur-[50px]"></div>
+        {/* Glow Effect */}
+        <div className="absolute -top-10 -left-10 w-32 h-32 bg-blue-600/20 blur-[60px] -z-10"></div>
 
-        <h2 className="text-2xl font-bold mb-8 text-white flex items-center gap-3">
-          <span className="bg-blue-600 p-2 rounded-xl text-lg">💼</span> 
-          Post a New Gig
-        </h2>
+        {/* Header Section */}
+        <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center gap-3">
+            <div className="bg-blue-600/20 p-2.5 rounded-xl">
+              <Briefcase className="text-blue-500" size={22} />
+            </div>
+            <h2 className="text-xl font-black text-white uppercase tracking-tighter">
+              Post a New Gig
+            </h2>
+          </div>
+          <button 
+            onClick={onClose} 
+            className="p-2 hover:bg-white/5 rounded-full text-slate-500 hover:text-white transition-all"
+          >
+            <X size={20} />
+          </button>
+        </div>
 
-        <div className="grid gap-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Job Title */}
           <div>
-            <label className="text-slate-400 text-xs font-bold uppercase ml-2 mb-2 block tracking-widest">
+            <label className="text-slate-500 text-[10px] font-black uppercase ml-1 mb-2 block tracking-[0.2em]">
               Job Title
             </label>
             <input 
-              className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl text-white outline-none focus:border-blue-500 transition-all shadow-inner"
+              className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-white text-sm outline-none focus:border-blue-500/50 transition-all shadow-inner"
               placeholder="e.g. Senior React Developer"
               value={formData.title}
               onChange={(e) => setFormData({...formData, title: e.target.value})}
@@ -73,31 +92,33 @@ const PostJob = ({ onJobAdded }) => {
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-6">
+            {/* Category */}
             <div>
-              <label className="text-slate-400 text-xs font-bold uppercase ml-2 mb-2 block tracking-widest">
+              <label className="text-slate-500 text-[10px] font-black uppercase ml-1 mb-2 block tracking-[0.2em]">
                 Category
               </label>
               <select 
-                className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl text-white outline-none focus:border-blue-500 appearance-none cursor-pointer"
+                className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-white text-sm outline-none focus:border-blue-500/50 cursor-pointer appearance-none"
                 value={formData.category}
                 onChange={(e) => setFormData({...formData, category: e.target.value})}
               >
-                <option>Web Dev</option>
-                <option>Design</option>
-                <option>App Dev</option>
-                <option>Writing</option>
+                <option className="bg-[#0B0F1A]">Web Dev</option>
+                <option className="bg-[#0B0F1A]">Design</option>
+                <option className="bg-[#0B0F1A]">App Dev</option>
+                <option className="bg-[#0B0F1A]">Writing</option>
               </select>
             </div>
 
+            {/* Price */}
             <div>
-              <label className="text-slate-400 text-xs font-bold uppercase ml-2 mb-2 block tracking-widest">
+              <label className="text-slate-500 text-[10px] font-black uppercase ml-1 mb-2 block tracking-[0.2em]">
                 Price ($)
               </label>
               <input 
                 type="number"
-                className="w-full bg-slate-950 border border-slate-800 p-4 rounded-2xl text-white outline-none focus:border-blue-500 transition-all shadow-inner"
-                placeholder="e.g. 500"
+                className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-white text-sm outline-none focus:border-blue-500/50 transition-all shadow-inner"
+                placeholder="500"
                 value={formData.price}
                 onChange={(e) => setFormData({...formData, price: e.target.value})}
                 required
@@ -105,19 +126,20 @@ const PostJob = ({ onJobAdded }) => {
             </div>
           </div>
 
+          {/* Action Button */}
           <button 
             type="submit" 
             disabled={isPosting}
-            className={`w-full mt-4 font-black py-4 rounded-2xl transition-all shadow-lg active:scale-[0.98] ${
+            className={`w-full mt-4 font-black py-4 rounded-2xl transition-all shadow-lg active:scale-[0.98] uppercase text-[11px] tracking-widest ${
               isPosting 
               ? 'bg-slate-800 text-slate-500 cursor-not-allowed' 
-              : 'bg-gradient-to-r from-blue-600 to-emerald-600 text-white hover:shadow-blue-500/25'
+              : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-500/20'
             }`}
           >
             {isPosting ? 'Publishing...' : 'Publish Gig 🚀'}
           </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 };

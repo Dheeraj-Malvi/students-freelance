@@ -15,10 +15,16 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
+import { ArrowRight } from 'lucide-react';
+import PostJob from './PostJob';
+import { Plus } from 'lucide-react';
+
 
 const Dashboard = () => {
     const { user, signOut } = useAuth();
     const navigate = useNavigate()
+    const [isPostModalOpen, setIsPostModalOpen] = useState(false); // Modal control
+    const userRole = user?.user_metadata?.role;
 
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768); // Desktop par by default open rahega
@@ -29,46 +35,87 @@ const Dashboard = () => {
     // console.log(user);
 
     // --- FETCH LOGIC ---
-    
-// 1. Function ko useCallback mein wrap kiya taaki ye stable rahe
-const fetchDashboardData = useCallback(async () => {
+
+    // 1. Function ko useCallback mein wrap kiya taaki ye stable rahe
+  const fetchDashboardData = useCallback(async () => {
     if (!user) return;
     setLoadingGigs(true);
     const userRole = user?.user_metadata?.role;
 
     try {
         if (userRole === 'client') {
-            // Fetch Gigs posted by Client
+            // Client ko sirf uski post ki hui jobs dikhao
             const { data, count, error } = await supabase
                 .from('jobs')
                 .select('*', { count: 'exact' })
-                .eq('user_id', user.id);
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false });
 
             if (error) throw error;
             setMyGigs(data || []);
             setStats(prev => ({ ...prev, active: count || 0 }));
         } else {
-            // Fetch Applications by Student
+            // STUDENT: Saari available jobs dikhao (Marketplace)
             const { data, count, error } = await supabase
-                .from('applications')
-                .select('*, jobs(*)', { count: 'exact' })
-                .eq('applicant_id', user.id);
+                .from('jobs') // <--- Yahan 'applications' ki jagah 'jobs' karo
+                .select('*', { count: 'exact' })
+                .order('created_at', { ascending: false });
 
             if (error) throw error;
             setMyGigs(data || []);
             setStats(prev => ({ ...prev, active: count || 0 }));
+            
+            // Stats ke liye student ki applications count kar sakte ho alag se
+            const { count: appCount } = await supabase
+                .from('applications')
+                .select('*', { count: 'exact', head: true })
+                .eq('applicant_id', user.id);
+
+            setStats(prev => ({ ...prev, active: appCount || 0 }));
         }
     } catch (err) {
         console.error("Dashboard Fetch Error:", err.message);
     } finally {
         setLoadingGigs(false);
     }
-}, [user]); // 🔥 Ye tabhi refresh hoga jab 'user' change hoga
+}, [user]);
 
-// 2. Ab useEffect safe hai aur warning nahi dega
-useEffect(() => {
-    fetchDashboardData();
-}, [fetchDashboardData]); // ✅ fetchDashboardData ab stable dependency hai
+
+    const handleApply = async (jobId) => {
+        if (!user) return alert("Please login first!");
+
+        try {
+            const { error } = await supabase
+                .from('applications')
+                .insert([
+                    {
+                        job_id: jobId,
+                        applicant_id: user.id,
+                        status: 'pending'
+                    }
+                ]);
+
+            if (error) {
+                // Check for duplicate application (Unique constraint error)
+                if (error.code === '23505') {
+                    alert("You've already applied for this gig!");
+                } else {
+                    throw error;
+                }
+            } else {
+                alert("Application submitted successfully! Keep an eye on your dashboard.");
+                fetchDashboardData(); // Refresh list to show updated status
+            }
+        } catch (err) {
+            console.error("Apply Error:", err.message);
+            alert("Something went wrong. Please try again.");
+        }
+    };
+
+    // 2. Ab useEffect safe hai aur warning nahi dega
+    useEffect(() => {
+        fetchDashboardData();
+    }, [fetchDashboardData]); // ✅ fetchDashboardData ab stable dependency hai
     const handleLogout = async () => {
         await signOut()
         navigate('/login'); // Logout ke baad login page par bhejo
@@ -209,59 +256,94 @@ useEffect(() => {
                             change="+0 this week"
                         />
                         <StatsCard title="Completed Gigs" value={stats.completed.toString().padStart(2, '0')} />
-                        <StatsCard title="Total Earnings" value={`₹${stats.earnings}`} color="text-emerald-400" />
+                        <StatsCard title="Total Earnings" value={`$ ${stats.earnings}`} color="text-emerald-400" />
                     </div>
 
                     {/* DYNAMIC LIST SECTION */}
                     <div className="mt-10">
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-sm font-black text-white uppercase tracking-widest">
-                                {user?.user_metadata?.role === 'client' ? "Your Posted Gigs" : "Your Recent Applications"}
+                                {userRole === 'client' ? "Your Posted Gigs" : "Marketplace: Available Gigs"}
                             </h3>
+
+                            {/* AGAR CLIENT HAI TOH 'POST GIG' BUTTON DIKHAO */}
+                            {userRole === 'client' && (
+                                <button
+                                    onClick={() => setIsPostModalOpen(true)}
+                                    className="bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 backdrop-blur-md border border-blue-500/30 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase flex items-center gap-2 transition-all active:scale-95 shadow-[0_0_20px_rgba(37,99,235,0.2)] hover:shadow-[0_0_25px_rgba(37,99,235,0.4)]"
+                                >
+                                    <Plus size={14} className="text-blue-400" /> Post a New Gig
+                                </button>)}
                         </div>
 
+                        {/* --- GIGS LIST --- */}
                         {loadingGigs ? (
-                            <div className="flex flex-col items-center justify-center h-48 border border-white/5 rounded-[2rem] bg-slate-900/30">
-                                <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                                <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest animate-pulse">Fetching from database...</p>
-                            </div>
+                            <div className="loading-spinner">...</div>
                         ) : myGigs.length > 0 ? (
-                            <div className="space-y-4">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                 {myGigs.map((item) => (
-                                    <div key={item.id} className="p-5 bg-slate-900/50 border border-white/5 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center hover:border-blue-500/30 transition-all">
+                                    <div key={item.id} className="p-5 bg-slate-900/50 border border-white/5 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center hover:border-blue-500/30 transition-all group mb-4">
+                                        {/* --- Left Side: Info --- */}
                                         <div>
-                                            <p className="text-white font-bold text-sm uppercase tracking-tight">
-                                                {user?.user_metadata?.role === 'client' ? item.title : item.jobs?.title}
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 text-[8px] font-bold rounded uppercase">
+                                                    {item.category || 'General'}
+                                                </span>
+                                                <span className="text-emerald-400 text-[10px] font-bold">$ {item.price}</span>
+                                            </div>
+
+                                            <p className="text-white font-bold text-sm uppercase truncate max-w-[200px]">
+                                                {item.title}
                                             </p>
-                                            <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest mt-1">
-                                                {new Date(item.created_at).toLocaleDateString()} • {item.status || 'Active'}
+
+                                            <p className="text-[9px] text-slate-500 uppercase font-bold tracking-widest mt-1">
+                                                {new Date(item.created_at).toLocaleDateString()} •
+                                                <span className="text-blue-500 ml-1">
+                                                    {userRole === 'client' ? 'Applicants tracking active' : 'Active Gig'}
+                                                </span>
                                             </p>
                                         </div>
-                                        <button className="mt-4 sm:mt-0 text-[10px] bg-white/5 hover:bg-white/10 text-white px-5 py-2.5 rounded-xl font-black uppercase flex items-center gap-2 border border-white/5 transition-all">
-                                            View Details <ArrowRight size={14} />
-                                        </button>
+
+                                        {/* --- Right Side: Actions (Buttons) --- */}
+                                        <div className="mt-4 sm:mt-0">
+                                            {userRole === 'student' ? (
+                                                // STUDENT VIEW: "Apply Now" Button
+                                                <button
+                                                    onClick={() => handleApply(item.id)}
+                                                    className="text-[10px] bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-black uppercase flex items-center gap-2 border border-blue-500/50 transition-all active:scale-95 shadow-lg shadow-blue-600/20"
+                                                >
+                                                    Apply Now <ArrowRight size={14} />
+                                                </button>
+                                            ) : (
+                                                // CLIENT VIEW: "Manage" Button
+                                                <button
+                                                    onClick={() => navigate(`/manage-gig/${item.id}`)}
+                                                    className="text-[10px] bg-white/5 hover:bg-white/10 text-white px-5 py-2.5 rounded-xl font-black uppercase flex items-center gap-2 border border-white/10 transition-all active:scale-95"
+                                                >
+                                                    View Applicants <ArrowRight size={14} />
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
-                                ))}
-                            </div>
+                                ))}                            </div>
                         ) : (
-                            <div className="border-2 border-dashed border-white/5 rounded-[2rem] h-64 flex flex-col items-center justify-center text-slate-600 gap-4">
-                                <Briefcase size={32} className="opacity-10" />
-                                <p className="text-xs font-bold uppercase tracking-widest opacity-40 italic">Nothing found in your records</p>
-                            </div>
+                            <div className="empty-state">...</div>
                         )}
                     </div>
 
-                    {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                        <StatsCard title="Active Applications" value="12" change="+2 from last week" />
-                        <StatsCard title="Completed Gigs" value="08" />
-                        <StatsCard title="Total Earnings" value="₹4,500" color="text-emerald-400" />
-                    </div>
-
-                    <div className="mt-10 border-2 border-dashed border-white/5 rounded-[2rem] h-64 flex items-center justify-center text-slate-600 italic text-sm text-center px-4">
-                        Recent Activity content will come here...
-                    </div> */}
                 </div>
             </main>
+            {isPostModalOpen && (
+                <PostJob
+                    isOpen={isPostModalOpen}
+                    onClose={() => setIsPostModalOpen(false)}
+                    onSuccess={() => {
+                        setIsPostModalOpen(false);
+                        fetchDashboardData(); // Fresh data fetch karo post ke baad
+                    }}
+                    onJobAdded={fetchDashboardData}
+                />
+            )}
         </div>
     );
 };
