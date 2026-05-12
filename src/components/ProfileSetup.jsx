@@ -4,10 +4,13 @@ import { User, Briefcase, FileText, Camera, CheckCircle, ChevronDown } from 'luc
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
+import { AtSign } from 'lucide-react';
 
 const ProfileSetup = () => {
     const { user } = useOutletContext();
     const [fullName, setFullName] = useState('');
+    const [username, setUsername] = useState(''); 
+    const [skills, setSkills] = useState('');
     const [bio, setBio] = useState('');
     const [role, setRole] = useState('student'); // Default from your table
     const [loading, setLoading] = useState(false);
@@ -90,6 +93,9 @@ const ProfileSetup = () => {
                 bio: bio,
                 role: role,
                 updated_at: new Date(),
+                avatar_url: avatarUrl,
+                username: username,
+                skills: skills.split(',').map(s => s.trim()) // Convert comma-separated skills to array
             };
 
             const { error: upsertError } = await supabase.from('profiles').upsert(updates);
@@ -106,9 +112,15 @@ const ProfileSetup = () => {
             });
             if (authError) throw authError;
 
-            setMessage('Profile setup complete! Welcome to Dashboard.');
-            setTimeout(() => navigate('/dashboard'), 2000);
-
+            setMessage('Profile setup complete! Taking you to the Dashboard.');
+            setTimeout(() => {
+                // will navigate based on role (student/client)
+                if (role === 'student') {
+                    navigate('/student-home'); // Student ke dashboard ka path
+                } else {
+                    navigate('/client-home');  // Client ke dashboard ka path
+                }
+            }, 2000);
         } catch (error) {
             setMessage(`Error: ${error.message}`);
         } finally {
@@ -197,6 +209,21 @@ const ProfileSetup = () => {
                                         {r}
                                     </button>
                                 ))}
+                            </div>
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-slate-400 text-[10px] font-black uppercase tracking-widest ml-1">Username</label>
+                            <div className="relative flex items-center">
+                                <AtSign className="absolute left-4 top-4 w-4 h-4 text-slate-500" />
+                                <input type="text" placeholder="USERNAME" className="w-full bg-slate-950/50 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-emerald-500/50 transition-all lowercase" value={username} onChange={(e) => setUsername(e.target.value)} required />
+                            </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className="text-slate-400 text-[10px] font-black uppercase tracking-widest ml-1">Skills</label>
+                            <div className="relative flex items-center">
+                                <Briefcase className="absolute left-4 top-4 w-4 h-4 text-slate-500" />
+                                <input type="text" placeholder="SKILLS (comma-separated)" className="w-full bg-slate-950/50 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-emerald-500/50 transition-all uppercase" value={skills} onChange={(e) => setSkills(e.target.value)} required />
                             </div>
                         </div>
 
