@@ -143,7 +143,7 @@ const ProfileDetails = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4 py-12 relative overflow-hidden">
+        <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4 py-4 relative overflow-hidden">
             <div className="relative group w-full max-w-lg">
                 <div className="absolute -inset-1 bg-gradient-to-r from-emerald-600 to-blue-600 rounded-[2.5rem] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
 

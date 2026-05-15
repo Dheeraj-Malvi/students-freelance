@@ -92,7 +92,7 @@ const ClientHome = () => {
                                 </h3>
                                 
                                 <div className="flex gap-2">
-                                    <button className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all">
+                                    <button onClick={() => navigate(`/manage-gig/${gig.id}`)} className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all">
                                         <Eye size={14} /> View Applicants
                                     </button>
                                     <button className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 hover:bg-red-500/20 transition-all">

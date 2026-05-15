@@ -13,24 +13,24 @@ const MyApplications = () => {
             if (!user) return;
 
             try {
-                // Hum 'applications' table se data la rahe hain aur saath mein 'jobs' table ko join kar rahe hain
                 const { data, error } = await supabase
                     .from('applications')
                     .select(`
+                    id,
+                    created_at,
+                    status,
+                    jobs (
                         id,
-                        created_at,
-                        status,
-                        jobs (
-                            id,
-                            title,
-                            company_name,
-                            location,
-                            salary
-                        )
-                    `)
+                        title,
+                        price,
+                        category
+                    )
+                `)
                     .eq('applicant_id', user.id)
                     .order('created_at', { ascending: false });
 
+                // console.log("Data:", data); // will show the fetched applications data
+                // console.log("Error:", error); // will show if there's any error in fetching
                 if (error) throw error;
                 setApplications(data || []);
             } catch (err) {
@@ -52,13 +52,13 @@ const MyApplications = () => {
     }
 
     return (
-        <div className="min-h-screen bg-slate-950 p-6 md:p-10">
+        <div className="min-h-screen bg-slate-950">
             <div className="max-w-4xl mx-auto">
                 <h1 className="text-3xl font-black text-white mb-2 uppercase tracking-tighter italic">
-                    My <span className="text-emerald-500">Applications</span>
+                    Your <span className="text-emerald-500">Applications</span>
                 </h1>
                 <p className="text-slate-500 text-sm mb-8 font-bold uppercase tracking-widest">
-                    Track your journey with {applications.length} active applications
+                    <i className="mr-2 text-xs text-blue-300">• Track your journey with {applications.length} active applications</i>
                 </p>
 
                 {applications.length === 0 ? (
@@ -69,8 +69,8 @@ const MyApplications = () => {
                 ) : (
                     <div className="space-y-4">
                         {applications.map((app) => (
-                            <div 
-                                key={app.id} 
+                            <div
+                                key={app.id}
                                 className="group bg-slate-900/40 border border-white/5 p-5 rounded-[2rem] hover:bg-slate-900/60 transition-all hover:border-emerald-500/20"
                             >
                                 <div className="flex items-center justify-between">
@@ -83,22 +83,22 @@ const MyApplications = () => {
                                                 {app.jobs?.title || 'Unknown Job'}
                                             </h3>
                                             <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">
-                                                {app.jobs?.company_name} • {app.jobs?.location}
+                                                {app.jobs?.category} • $ {app.jobs?.price}
                                             </p>
                                         </div>
                                     </div>
 
                                     <div className="flex items-center gap-6">
                                         <div className="text-right hidden sm:block">
-                                            <div className={`text-[10px] font-black uppercase px-3 py-1 rounded-full border ${
-                                                app.status === 'accepted' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
-                                                app.status === 'rejected' ? 'bg-red-500/10 border-red-500/20 text-red-500' :
-                                                'bg-blue-500/10 border-blue-500/20 text-blue-400'
-                                            }`}>
+                                            <div className={`text-[10px] w-fit font-black uppercase px-3 py-1 rounded-full border ${app.status === 'accepted' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
+                                                    app.status === 'accepted' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 
+                                                    app.status === 'pending' ? 'bg-blue-500/10 border-blue-500/20 text-blue-400' : 
+                                                    'bg-red-500/10 border-red-500/20 text-red-500'
+                                                }`}>
                                                 {app.status || 'pending'}
                                             </div>
                                             <p className="text-[9px] text-slate-600 mt-1 font-bold">
-                                                Applied on {new Date(app.created_at).toLocaleDateString()}
+                                                <Clock className="inline-block" size={12} /> Applied on {new Date(app.created_at).toLocaleDateString()}
                                             </p>
                                         </div>
                                         <ChevronRight className="text-slate-700 group-hover:text-white transition-all" size={20} />
