@@ -72,13 +72,13 @@ const DashboardLayout = () => {
 
                     {/* Applications Link */}
                     <Link
-                        to="/my-applications"
+                        to={userRole === 'client' ? '/my-gigs' : '/my-applications'}
                         onClick={() => closeSidebarOnMobile()}
                     >
                         <NavItem
                             icon={<Briefcase size={20} />}
                             label={userRole === 'client' ? 'My Gigs' : 'My Applications'}
-                            active={location.pathname === '/my-applications'}
+                            active={location.pathname === '/my-applications' || location.pathname === '/my-gigs'}
                             isOpen={isSidebarOpen}
                         />
                     </Link>

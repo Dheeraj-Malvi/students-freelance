@@ -19,7 +19,7 @@ function App() {
     if (!error) setJobs(data);
   };
 
-  const hideNavbarPages = ['/login', '/signup', '/profiledetails', '/forgot-password', '/update-password', '/dashboard', '/my-applications'];
+  const hideNavbarPages = ['/login', '/signup', '/profiledetails', '/forgot-password', '/update-password', '/dashboard', '/my-applications', '/manage-gig', '/my-gigs', '/client-home', '/student-home'];
   const shouldHideNavbar = hideNavbarPages.includes(location.pathname);
 
   useEffect(() => {

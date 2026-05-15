@@ -33,11 +33,32 @@ const Dashboard = () => {
         } catch (err) { console.error(err); } finally { setLoadingGigs(false); }
     }, [user, userRole]);
 
+    const [_gigs, setGigs] = useState([]);
+
+    const fetchGigs = async () => {
+    try {
+        const { data, error } = await supabase
+            .from('jobs')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setGigs(data || []);
+    } catch (err) {
+        console.error("Error fetching gigs:", err.message);
+    }
+};
+
+// 3. Page load hote hi data fetch karo
+useEffect(() => {
+    fetchGigs();
+}, []);
+
     useEffect(() => { fetchDashboardData(); }, [fetchDashboardData]);
 
     const handleApply = async (jobId) => {
         const { error } = await supabase.from('applications').insert([{ job_id: jobId, applicant_id: user.id, status: 'pending' }]);
-        if (!error) { alert("Applied! 🚀"); fetchDashboardData(); }
+        if (!error) { alert("Applied Successfully!"); fetchDashboardData(); }
     };
 
     const filteredGigs = myGigs.filter(gig => gig.title?.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -49,7 +70,7 @@ const Dashboard = () => {
                     Welcome Back, <span className="text-blue-500">{user?.user_metadata?.full_name?.split(' ')[0]}</span> 👋
                 </h2>
                 <span className="text-sm text-slate-500 mb-4 tracking-widest">
-                    <i className="text-blue-500">💡 {userRole === 'student' ? "Turn your skills into pocket money." : "Hire top-tier student talent at half the cost"}</i>
+                    <i className="text-blue-300">💡 {userRole === 'student' ? "Turn your skills into pocket money." : "Hire top-tier student talent at half the cost"}</i>
                 </span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
@@ -61,9 +82,12 @@ const Dashboard = () => {
             <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xs font-black text-white uppercase tracking-widest">{userRole === 'client' ? "Manage Your Gigs" : "Marketplace"}</h3>
                 {userRole === 'client' && (
-                    <button onClick={() => setIsPostModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase flex items-center gap-2">
-                        <Plus size={14} /> Post New Gig
+                    <button onClick={() => setIsPostModalOpen(true)} className="relative group overflow-hidden bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 hover:border-blue-500/50 px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase flex items-center gap-2 transition-all duration-300 backdrop-blur-md shadow-[0_0_20px_rgba(59,130,246,0.1)] hover:shadow-[0_0_25px_rgba(59,130,246,0.2)]">
+                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"/> 
+                       <Plus size={14} className="group-hover:rotate-90 transition-transform duration-300"/> 
+                        Post New Gig                    
                     </button>
+                    
                 )}
             </div>
 
@@ -91,7 +115,7 @@ const Dashboard = () => {
                 </div>
             )}
 
-            {isPostModalOpen && <PostJob isOpen={isPostModalOpen} onClose={() => setIsPostModalOpen(false)} onSuccess={fetchDashboardData} />}
+            {isPostModalOpen && <PostJob isOpen={isPostModalOpen} onClose={() => setIsPostModalOpen(false)} onJobAdded={fetchGigs} onSuccess={fetchDashboardData} />}
         </>
     );
 };

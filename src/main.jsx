@@ -16,6 +16,8 @@ import ProtectedRoute from './components/ProtectedRoute.jsx'
 import ProfileDetails from './components/ProfileDetails.jsx'
 import MyApplications from './components/MyApplications.jsx'
 import DashboardLayout from './layout/DashboardLayout.jsx'
+import ManageGig from './components/ManageGig.jsx'
+import MyGigs from './components/MyGigs.jsx'
 
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -35,6 +37,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="profiledetails" element={<ProfileDetails />} />
               <Route path="my-applications" element={<MyApplications />} />
+              <Route path="manage-gig" element={<ManageGig />} />
+              <Route path="my-gigs" element={<MyGigs />} />
+              <Route path="/manage-gig/:jobId" element={<ManageGig />} />
               {/* Role specific homes can also go here if they need the sidebar */}
               <Route
                 path="client-home"

@@ -2,7 +2,7 @@ import React from 'react';
 import { Clock, DollarSign, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const JobCard = ({ title, category, price, rating, created_at }) => {
+const JobCard = ({ title, category, price, created_at }) => {
   
   const navigate = useNavigate();
   // Dynamic Time Helper Function
@@ -44,9 +44,9 @@ const JobCard = ({ title, category, price, rating, created_at }) => {
             {category}
           </span>
 
-          <div className="flex items-center text-yellow-500 gap-1 bg-yellow-500/10 px-2.5 py-1 rounded-lg border border-yellow-500/20 mr-8 lg:mr-0 group-hover:mr-8 transition-all duration-300">
-            <Star className="w-3.5 h-3.5 fill-current" />
-            <span className="text-xs font-black">{rating}</span>
+          <div className="flex items-center gap-0.5 text-emerald-400 font-bold bg-emerald-500/5 backdrop-blur-md px-3 py-1.5 rounded-lg border border-emerald-500/20">
+            <DollarSign className="w-4 h-4" />
+            <span className="text-base tracking-tight">{price}</span>
           </div>
         </div>
 
@@ -61,10 +61,6 @@ const JobCard = ({ title, category, price, rating, created_at }) => {
             <Clock className="w-3.5 h-3.5 text-slate-500" />
             {/* UPDATED TIME LOGIC HERE */}
             <span className="font-medium text-[13px]">{formatTimeAgo(created_at)}</span>
-          </div>
-          <div className="flex items-center gap-0.5 text-emerald-400 font-bold bg-emerald-500/5 backdrop-blur-md px-3 py-1.5 rounded-full border border-emerald-500/20">
-            <DollarSign className="w-4 h-4" />
-            <span className="text-base tracking-tight">{price}</span>
           </div>
         </div>
 

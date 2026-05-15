@@ -96,7 +96,6 @@ function Home() {
                                     title={job.title}
                                     category={job.category}
                                     price={job.price}
-                                    rating={job.rating}
                                     created_at={job.created_at}
                                 />
                                 {user && user.id === job.user_id && (
