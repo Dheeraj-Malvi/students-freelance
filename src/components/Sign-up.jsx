@@ -22,7 +22,7 @@ const Signup = () => {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/profilesetup`, // redirect after email verification
+        emailRedirectTo: `${window.location.origin}/profiledetails`, // redirect after email verification
         data: {
           role: role, // Ye metadata mein save ho jayega
         }

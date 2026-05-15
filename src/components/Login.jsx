@@ -53,12 +53,12 @@ const Login = () => {
           navigate('/dashboard', { replace: true });
         } else {
           console.log("No profile found, going to setup");
-          navigate('/profilesetup', { replace: true }); 
+          navigate('/profiledetails', { replace: true }); 
         }
       } catch (err) {
         console.error("Profile check failed:", err);
         // Fallback: Agar error aaye toh safety ke liye setup par bhejo
-        navigate('/profilesetup');
+        navigate('/profiledetails');
       }
     };
   };

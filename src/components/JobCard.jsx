@@ -1,8 +1,10 @@
 import React from 'react';
 import { Clock, DollarSign, Star } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const JobCard = ({ title, category, price, rating, created_at }) => {
   
+  const navigate = useNavigate();
   // Dynamic Time Helper Function
   const formatTimeAgo = (dateString) => {
     if (!dateString) return "Just now";
@@ -67,7 +69,7 @@ const JobCard = ({ title, category, price, rating, created_at }) => {
         </div>
 
         {/* Action Button */}
-        <button className="w-full relative overflow-hidden bg-white/5 hover:bg-white/10 text-white py-3.5 rounded-2xl font-bold transition-all duration-300 border border-white/10 hover:border-blue-500/50 hover:text-blue-200 group-hover:shadow-[0_0_30px_rgba(37,99,235,0.2)]">
+        <button onClick={() => navigate('/login')} className="w-full relative overflow-hidden bg-white/5 hover:bg-white/10 text-white py-3.5 rounded-2xl font-bold transition-all duration-300 border border-white/10 hover:border-blue-500/50 hover:text-blue-200 group-hover:shadow-[0_0_30px_rgba(37,99,235,0.2)]">
           <span className="relative z-10">Apply Now</span>
         </button>
       </div>
