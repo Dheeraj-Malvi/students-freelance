@@ -11,7 +11,7 @@ const ProtectedRoute = ({ children }) => {
   }
 
   if (!user.user_metadata?.setup_complete) {
-    return <Navigate to="/profilesetup" replace />;
+    return <Navigate to="/profiledetails" replace />;
   }
 
   return children;

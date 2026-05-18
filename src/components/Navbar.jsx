@@ -75,9 +75,9 @@ const Navbar = () => {
           StudentFreelanceHub
         </Link> */}
 
-        <Link to="/dashboard" className="px-4 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition-all">
+        {/* <Link to="/dashboard" className="px-4 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition-all">
           My Dashboard
-        </Link>
+        </Link> */}
 
         <div className="relative z-10 flex items-center gap-6">
           {user ? (

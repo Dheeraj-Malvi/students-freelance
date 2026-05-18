@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }) => {
       if (event === 'SIGNED_IN' && session) {
         // Chota sa delay taaki Supabase session load ho jaye
         setTimeout(() => {
-          navigate('/profilesetup');
+          navigate('/profiledetails'); // Redirect to profile setup after login
         }, 500);
       }
     
