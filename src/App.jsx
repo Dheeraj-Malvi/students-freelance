@@ -15,12 +15,19 @@ function App() {
       .from('jobs')
       .select('*')
       .order('created_at', { ascending: false });
-    
+
     if (!error) setJobs(data);
   };
 
   const hideNavbarPages = ['/login', '/signup', '/profiledetails', '/forgot-password', '/update-password', '/dashboard', '/client-home', '/student-home', '/my-gigs', '/my-applications', '/manage-gig'];
-  const shouldHideNavbar = hideNavbarPages.some(page => location.pathname.startsWith(page));
+
+  // 1. CHECK IF CURRENT PATH STARTS WITH ANY OF THE HIDDEN PAGES
+  const isInsideHiddenPages = hideNavbarPages.some(page => location.pathname.startsWith(page));
+
+  const isValidPage = location.pathname === '/' || isInsideHiddenPages;
+
+  // 2. FINAL CONDITION: Navbar will be visible only if it's a valid page and not inside hidden pages
+  const shouldHideNavbar = isInsideHiddenPages || !isValidPage;
 
   useEffect(() => {
     // 🛡️ FAIL-SAFE: Agar 3 second tak session nahi mila, toh loading band kar do
@@ -86,16 +93,16 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
-      {!shouldHideNavbar && <Navbar user={user} />}      
+      {!shouldHideNavbar && <Navbar user={user} />}
       <main>
-        <Outlet context={{ 
-          user, 
-          jobs, 
-          searchTerm, 
-          setSearchTerm, 
-          filteredJobs, 
+        <Outlet context={{
+          user,
+          jobs,
+          searchTerm,
+          setSearchTerm,
+          filteredJobs,
           handleDelete,
-          fetchJobs 
+          fetchJobs
         }} />
       </main>
     </div>
