@@ -16,10 +16,10 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setErrorMessage(''); 
+    setErrorMessage('');
 
     // 1. SIGN IN
-    const {data, error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email: email,
       password: password
     });
@@ -53,7 +53,7 @@ const Login = () => {
           navigate('/dashboard', { replace: true });
         } else {
           console.log("No profile found, going to setup");
-          navigate('/profiledetails', { replace: true }); 
+          navigate('/profiledetails', { replace: true });
         }
       } catch (err) {
         console.error("Profile check failed:", err);
@@ -152,7 +152,7 @@ const Login = () => {
 
             <button
               disabled={loading}
-              className="w-full relative group overflow-hidden font-black py-4 rounded-xl transition-all duration-300 active:scale-95 mt-4 uppercase tracking-widest text-xs
+              className="w-full relative group/btn overflow-hidden font-black py-4 rounded-xl transition-all duration-300 active:scale-95 mt-4 uppercase tracking-widest text-xs
     /* Glass Effect Base */
     bg-blue-600/20 backdrop-blur-md 
     /* Borders */
@@ -164,11 +164,11 @@ const Login = () => {
     hover:shadow-[0_0_30px_rgba(37,99,235,0.3)]
     hover:bg-blue-600/40"
             >
-              {/* Glass Shine Animation Layer */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
+              {/* ✨ Shine sirf tab chalega jab MOUSE BUTTON PAR AAYEGA (`group-hover/btn`) */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 ease-out pointer-events-none" />
 
               <span className="relative z-10">
-                {loading ? "Checking..." : "Login"}
+                {loading ? "Logging in..." : "Login"}
               </span>
             </button>
           </form>

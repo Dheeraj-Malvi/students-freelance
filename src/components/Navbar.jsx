@@ -87,7 +87,6 @@ const Navbar = () => {
                 {user.email.split('@')[0]}
               </span>
 
-              {/* LOGOUT: Premium Liquid Glass Red */}
               <button
                 onClick={handleLogout}
                 className="relative group/btn px-5 py-2.5 rounded-full transition-all duration-300 active:scale-95 overflow-hidden"
@@ -106,20 +105,15 @@ const Navbar = () => {
               </Link>
 
               {/* JOIN NOW: Ultra Liquid Glass Blue */}
-              <Link to="/signup" className="relative group/btn px-6 py-2.5 rounded-full transition-all duration-300 active:scale-95 overflow-hidden flex items-center justify-center">
-                {/* Main Body */}
-                <div className="absolute inset-0 bg-blue-600/20 backdrop-blur-md border border-blue-400/30 group-hover/btn:bg-blue-600/30 group-hover/btn:border-blue-400/50 transition-all"></div>
+                <Link
+                  to="/signup"
+                  className="relative group overflow-hidden px-6 py-2.5 rounded-full bg-blue-600/20 border border-blue-400/30 text-blue-400 hover:text-white hover:bg-blue-600/30 transition-all text-[10px] font-black uppercase tracking-widest"
+                >
+                  {/* ✨ Glassy Shine Effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
 
-                {/* Shimmer Wave */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:animate-shimmer"></div>
-
-                {/* Outer Glow */}
-                <div className="absolute inset-0 opacity-0 group-hover/btn:opacity-100 bg-blue-400/10 blur-xl transition-opacity"></div>
-
-                <span className="relative z-10 text-blue-400 group-hover/btn:text-white text-[10px] font-black uppercase tracking-[0.2em]">
-                  Join
-                </span>
-              </Link>
+                  <span className="relative z-10">Join Now</span>
+                </Link>
             </div>
           )}
         </div>

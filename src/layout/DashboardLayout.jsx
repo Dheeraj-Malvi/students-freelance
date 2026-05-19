@@ -105,13 +105,26 @@ const DashboardLayout = () => {
                         <div className="relative pl-3 md:pl-6 border-l border-white/10">
                             <button
                                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-emerald-500 border border-white/10 flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+                                className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-emerald-500 border border-white/10 flex items-center justify-center shadow-lg active:scale-95 transition-transform overflow-hidden group/avatar"
                             >
-                                <span className="text-white font-black text-xs uppercase">
-                                    {user?.user_metadata?.full_name ? user.user_metadata.full_name.split(' ').map(n => n[0]).join('').slice(0, 2) : "DM"}
-                                </span>
+                                {/* 📸 Check user profile photo first */}
+                                {user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
+                                    <img
+                                        src={user.user_metadata.avatar_url || user.user_metadata.picture}
+                                        alt="Profile Avatar"
+                                        className="w-full h-full object-cover transition-transform duration-300 group-hover/avatar:scale-110"
+                                        referrerPolicy="no-referrer"
+                                    />
+                                ) : (
+                                    /* 🛡️ Fallback Initials (Agar photo nahi hai) */
+                                    <span className="text-white font-black text-xs uppercase tracking-wider">
+                                        {user?.user_metadata?.full_name
+                                            ? user.user_metadata.full_name.split(' ').map(n => n[0]).join('').slice(0, 2)
+                                            : "DM"
+                                        }
+                                    </span>
+                                )}
                             </button>
-
                             {isProfileOpen && (
                                 <>
                                     <div className="fixed inset-0 z-[80]" onClick={() => setIsProfileOpen(false)}></div>

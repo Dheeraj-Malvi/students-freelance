@@ -138,7 +138,9 @@ const checkRecovery = async () => {
                                 disabled={loading || (confirmPassword && password !== confirmPassword)}
                                 className="w-full relative group/btn overflow-hidden font-black py-4 rounded-xl transition-all duration-300 active:scale-95 mt-4 uppercase tracking-widest text-xs bg-emerald-600/20 backdrop-blur-md border border-emerald-500/30 border-t-emerald-400/50 text-emerald-400 hover:text-white shadow-[0_0_20px_rgba(16,185,129,0.1)] hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] hover:bg-emerald-600/40 disabled:opacity-30 disabled:cursor-not-allowed"
                             >
-                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/btn:animate-shimmer"></div>
+                                {/* ✨ Smooth Emerald Laser Swipe (Sirf button hover par) */}
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 ease-out pointer-events-none" />
+
                                 <span className="relative z-10">{loading ? "Updating..." : "Update Password"}</span>
                             </button>
                         </form>

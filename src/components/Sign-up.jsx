@@ -104,8 +104,8 @@ const Signup = () => {
                       type="button"
                       onClick={() => setRole(r)}
                       className={`flex-1 py-3 rounded-2xl border transition-all duration-300 capitalize font-bold text-xs tracking-widest ${role === r
-                          ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.1)]'
-                          : 'bg-slate-950/50 border-white/5 text-slate-500 hover:border-white/10'
+                        ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.1)]'
+                        : 'bg-slate-950/50 border-white/5 text-slate-500 hover:border-white/10'
                         }`}
                     >
                       {r}
@@ -153,12 +153,15 @@ const Signup = () => {
 
             <button
               disabled={loading}
-              className="w-full relative group overflow-hidden font-black py-4 rounded-xl transition-all duration-300 active:scale-95 mt-4 uppercase tracking-widest text-xs bg-emerald-600/20 backdrop-blur-md border border-emerald-500/30 border-t-emerald-400/50 text-emerald-400 hover:text-white shadow-[0_0_20px_rgba(16,185,129,0.1)] hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] hover:bg-emerald-600/40 disabled:opacity-50"
+              className="w-full relative group/btn overflow-hidden font-black py-4 rounded-xl transition-all duration-300 active:scale-95 mt-4 uppercase tracking-widest text-xs bg-emerald-600/20 backdrop-blur-md border border-emerald-500/30 border-t-emerald-400/50 text-emerald-400 hover:text-white shadow-[0_0_20px_rgba(16,185,129,0.1)] hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] hover:bg-emerald-600/40 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
-              <span className="relative z-10">{loading ? "Creating account..." : "Sign Up"}</span>
-            </button>
-          </form>
+              {/* ✨ Shine sirf tab chalega jab MOUSE BUTTON PAR AAYEGA (`group-hover/btn`) */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 ease-out pointer-events-none" />
+
+              <span className="relative z-10">
+                {loading ? "Creating account..." : "Sign Up"}
+              </span>
+            </button>          </form>
 
           <p className="text-center text-slate-500 mt-6 text-sm">
             Already have an account?{' '}

@@ -4,13 +4,13 @@ import PostJob from './PostJob';
 import JobCard from './JobCard';
 
 function Home() {
-    const { 
-        user, 
-        searchTerm, 
-        setSearchTerm, 
-        filteredJobs, 
-        handleDelete, 
-        fetchJobs 
+    const {
+        user,
+        searchTerm,
+        setSearchTerm,
+        filteredJobs,
+        handleDelete,
+        fetchJobs
     } = useOutletContext();
 
     const role = user?.user_metadata?.role;
@@ -21,7 +21,7 @@ function Home() {
             {/* --- HERO SECTION --- */}
             <div className="pt-24 pb-16 px-6 text-center relative overflow-hidden">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-500/10 via-transparent to-transparent -z-10"></div>
-                
+
                 <h1 className="text-4xl sm:text-5xl md:text-7xl font-black mb-6 tracking-tighter leading-tight px-2 text-white">
                     Find the perfect <br />
                     <span className="bg-gradient-to-r from-blue-400 via-emerald-400 to-blue-500 bg-clip-text text-transparent italic drop-shadow-[0_0_15px_rgba(59,130,246,0.3)]">
@@ -47,47 +47,48 @@ function Home() {
 
             {/* --- MAIN CONTENT --- */}
             <main className="max-w-7xl mx-auto px-6 pb-24">
-                
+
                 {/* --- MODIFIED "READY TO HIRE" CARD --- */}
                 <div className="mb-20">
                     {!user ? (
-    <div className="max-w-2xl mx-auto relative group/card">
-        {/* 1. OUTER GLOW: Card ke peeche ek emerald glow jo hover par bade ga */}
-        <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 to-blue-500/20 rounded-[2.6rem] blur-2xl opacity-0 group-hover/card:opacity-100 transition duration-700"></div>
+                        <div className="max-w-2xl mx-auto relative group/card">
+                            {/* 1. OUTER GLOW: Card ke peeche ek emerald glow jo hover par bade ga */}
+                            <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 to-blue-500/20 rounded-[2.6rem] blur-2xl opacity-0 group-hover/card:opacity-100 transition duration-700"></div>
 
-        <div className="relative bg-slate-950/40 backdrop-blur-2xl border border-white/10 p-12 rounded-[2.5rem] text-center shadow-2xl overflow-hidden">
-            
-            {/* 2. DYNAMIC CORNER GLOWS: Different colors for variety */}
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-emerald-500/10 blur-[80px] pointer-events-none group-hover/card:bg-emerald-500/20 transition-all duration-500"></div>
-            <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-600/10 blur-[80px] pointer-events-none group-hover/card:bg-blue-600/20 transition-all duration-500"></div>
+                            <div className="relative bg-slate-950/40 backdrop-blur-2xl border border-white/10 p-12 rounded-[2.5rem] text-center shadow-2xl overflow-hidden">
 
-            {/* 3. CONTENT: Bold and Italicized for Gamer/Tech vibe */}
-            <h3 className="text-4xl font-black mb-4 text-white tracking-tighter italic uppercase drop-shadow-lg">
-                Ready to <span className="text-emerald-400">hire?</span> 🚀
-            </h3>
-            <p className="text-slate-400 mb-10 font-medium italic max-w-md mx-auto leading-relaxed">
-                Log in as a <span className="text-emerald-400 border-b border-emerald-500/30">Client</span> to post your requirements and find the best student talent in the market.
-            </p>
+                                {/* 2. DYNAMIC CORNER GLOWS: Different colors for variety */}
+                                <div className="absolute -top-24 -right-24 w-64 h-64 bg-emerald-500/10 blur-[80px] pointer-events-none group-hover/card:bg-emerald-500/20 transition-all duration-500"></div>
+                                <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-600/10 blur-[80px] pointer-events-none group-hover/card:bg-blue-600/20 transition-all duration-500"></div>
 
-            {/* 4. THE SHINING BUTTON: Using your 'shimmer' animation */}
-            <Link
-                to="/login"
-                className="relative inline-flex items-center justify-center px-14 py-4 overflow-hidden font-black text-xs uppercase tracking-[0.2em] text-emerald-400 border border-emerald-500/40 rounded-xl bg-emerald-500/10 backdrop-blur-md transition-all duration-500 group/btn hover:text-white hover:bg-emerald-500 hover:shadow-[0_0_40px_rgba(16,185,129,0.5)] active:scale-95"
-            >
-                {/* Your Shimmer Animation Logic */}
-                <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full animate-shimmer"></span>
-                <span className="relative">Login to Post</span>
-            </Link>
-        </div>
-    </div>
-) : isClient ? (
-    <PostJob onJobAdded={fetchJobs} />
-) : (
-    // Student view logic...
-    <div className="text-center py-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
-         <p className="text-emerald-400 text-[10px] font-black uppercase tracking-widest animate-pulse">● Live Opportunities Found</p>
-    </div>
-)}
+                                {/* 3. CONTENT: Bold and Italicized for Gamer/Tech vibe */}
+                                <h3 className="text-4xl font-black mb-4 text-white tracking-tighter italic uppercase drop-shadow-lg">
+                                    Ready to <span className="text-emerald-400">hire?</span> 🚀
+                                </h3>
+                                <p className="text-slate-400 mb-10 font-medium italic max-w-md mx-auto leading-relaxed">
+                                    Log in as a <span className="text-emerald-400 border-b border-emerald-500/30">Client</span> to post your requirements and find the best student talent in the market.
+                                </p>
+
+                                {/* 4. THE SHINING BUTTON: Using your 'shimmer' animation */}
+                                <Link
+                                    to="/login"
+                                    className="relative inline-flex items-center justify-center px-14 py-4 overflow-hidden font-black text-xs uppercase tracking-[0.2em] text-emerald-400 border border-emerald-500/40 rounded-xl bg-emerald-500/10 backdrop-blur-md transition-all duration-500 group/btn hover:text-white hover:bg-emerald-800 hover:shadow-[0_0_40px_rgba(16,185,129,0.5)] active:scale-95"
+                                >
+                                    {/* ✨ Smooth Shimmer Logic on Hover */}
+                                    <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 ease-out"></span>
+
+                                    <span className="relative z-10">Login to Post</span>
+                                </Link>
+                            </div>
+                        </div>
+                    ) : isClient ? (
+                        <PostJob onJobAdded={fetchJobs} />
+                    ) : (
+                        // Student view logic...
+                        <div className="text-center py-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
+                            <p className="text-emerald-400 text-[10px] font-black uppercase tracking-widest animate-pulse">● Live Opportunities Found</p>
+                        </div>
+                    )}
                 </div>
 
                 {/* --- JOBS LIST --- */}
@@ -99,7 +100,6 @@ function Home() {
                                     title={job.title}
                                     category={job.category}
                                     price={job.price}
-                                    rating={job.rating}
                                     created_at={job.created_at}
                                 />
                                 {user && user.id === job.user_id && (

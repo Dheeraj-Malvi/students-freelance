@@ -5,6 +5,9 @@ import { useNavigate, useOutletContext } from 'react-router-dom';
 import { useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { AtSign } from 'lucide-react';
+import { useRef } from 'react';
+import { Sliders } from 'lucide-react';
+import { X } from 'lucide-react';
 
 const ProfileDetails = () => {
     const { user } = useOutletContext();
@@ -23,6 +26,17 @@ const ProfileDetails = () => {
 
     const [isEditing, setIsEditing] = useState(false);
     const [isExistingUser, setIsExistingUser] = useState(false);
+
+    // --- ✂️ NEW CROPPER MODAL STATES ---
+    const [isCropModalVisible, setIsCropModalVisible] = useState(false); // ✨ Ye animation logic ke liye
+    const [isCropModalOpen, setIsCropModalOpen] = useState(false);
+    const [rawImageSrc, setRawImageSrc] = useState(null);
+    const [scale, setScale] = useState(1);
+    const [offset, setOffset] = useState({ x: 0, y: 0 });
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+    const imageRef = useRef(null);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -48,7 +62,7 @@ const ProfileDetails = () => {
             }
         };
         fetchProfile();
-    }, [user]);
+    }, [user, isEditing]);
 
     if (!user) {
         return (
@@ -61,19 +75,106 @@ const ProfileDetails = () => {
         );
     }
 
+// 📸 1. Image Select handler (Popup Trigger)
     const handleImageChange = (e) => {
-        if (!isEditing) return; // Prevent image change in view mode
+        if (!isEditing) return;
         const file = e.target.files[0];
         if (file) {
-            if (file.size > 2 * 1024 * 1024) { // 2MB limit
+            if (file.size > 2 * 1024 * 1024) {
                 setMessage("Error: Image size should be less than 2MB");
                 return;
             }
-            setAvatarFile(file);
-            setPreviewUrl(URL.createObjectURL(file));
+            const reader = new FileReader();
+            reader.onload = () => {
+                setRawImageSrc(reader.result);
+                setScale(1);
+                setOffset({ x: 0, y: 0 });
+                setIsCropModalOpen(true); // Open Popup Modal
+                setTimeout(() => setIsCropModalVisible(true), 10); // Delay for animation trigger
+            };
+            reader.readAsDataURL(file);
+            e.target.value = null; // Clear input field
         }
     };
 
+    const smoothCloseModal = () => {
+        setIsCropModalVisible(false); // Anime close karo
+        setTimeout(() => {
+            setIsCropModalOpen(false); // DOM se hatao transition khatam hone ke baad
+        }, 300); // Transitions duration ke matching delay (300ms)
+    };
+
+    // 🖱️ 2. Drag & Position Event Handlers for Cropper
+    const handleMouseDown = (e) => {
+        setIsDragging(true);
+        setDragStart({ x: e.clientX - offset.x, y: e.clientY - offset.y });
+    };
+
+    const handleMouseMove = (e) => {
+        if (!isDragging) return;
+        setOffset({
+            x: e.clientX - dragStart.x,
+            y: e.clientY - dragStart.y
+        });
+    };
+
+    const handleMouseUp = () => setIsDragging(false);
+
+    // ✂️ 3. Process Canvas Cropping
+const handleCropSave = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 300;
+    canvas.height = 300;
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.src = rawImageSrc;
+
+    img.onload = () => {
+        ctx.clearRect(0, 0, 300, 300);
+        ctx.save();
+        
+        // ✨ FIX: Purana arc (circle) hata kar humne yahan Square-Rounded (Path) banaya hai
+        const radius = 40; // Aap is radius ko badha-ghata sakte hain corner roundness adjust karne ke liye
+        ctx.beginPath();
+        ctx.moveTo(radius, 0);
+        ctx.lineTo(300 - radius, 0);
+        ctx.quadraticCurveTo(300, 0, 300, radius);
+        ctx.lineTo(300, 300 - radius);
+        ctx.quadraticCurveTo(300, 300, 300 - radius, 300);
+        ctx.lineTo(radius, 300);
+        ctx.quadraticCurveTo(0, 300, 0, 300 - radius);
+        ctx.lineTo(0, radius);
+        ctx.quadraticCurveTo(0, 0, radius, 0);
+        ctx.closePath();
+        ctx.clip(); // Ab canvas square-rounded clip karega, corners par black spaces nahi aayenge!
+
+        // Image aspect ratio math
+        const imgRatio = img.width / img.height;
+        let drawWidth = 300;
+        let drawHeight = 300;
+
+        if (imgRatio > 1) {
+            drawWidth = 300 * imgRatio;
+        } else {
+            drawHeight = 300 / imgRatio;
+        }
+
+        ctx.translate(150 + offset.x, 150 + offset.y);
+        ctx.scale(scale, scale);
+        ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+        ctx.restore();
+
+        // Convert canvas data to Blob for Supabase upload
+        canvas.toBlob((blob) => {
+            if (blob) {
+                const croppedFile = new File([blob], "avatar.jpg", { type: "image/jpeg" });
+                setAvatarFile(croppedFile);
+                setPreviewUrl(URL.createObjectURL(croppedFile));
+                smoothCloseModal();
+            }
+        }, 'image/jpeg', 0.9);
+    };
+};
     const handleProfileUpdate = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -290,6 +391,92 @@ const ProfileDetails = () => {
                     </form>
                 </div>
             </div>
+
+            {/* CROPPER MODAL */}
+            {isCropModalOpen && (
+<div 
+        className={`fixed inset-0 z-[100] flex items-center justify-center p-4 transition-all duration-300 ease-out backdrop-blur-md ${isCropModalVisible ? 'opacity-100 bg-slate-950/80' : 'opacity-0 bg-slate-950/0'}`}
+        onTransitionEnd={() => { if(!isCropModalVisible) smoothCloseModal(); }} // Animation sync
+    >
+        <div className={`relative w-full max-w-md bg-slate-900/90 border border-white/10 rounded-[2rem] p-6 shadow-2xl overflow-hidden group/modal transition-all duration-300 ease-out transform ${isCropModalVisible ? 'scale-100' : 'scale-95'}`}>
+            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-emerald-500 rounded-[2rem] blur opacity-10 group-hover/modal:opacity-20 transition"></div>
+
+            {/* Modal Header */}
+            <div className="relative z-10 flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                    <Sliders size={18} className="text-blue-400" />
+                    Adjust Avatar Photo
+                </h3>
+                <button onClick={smoothCloseModal} className="text-slate-400 hover:text-white p-1 rounded-full bg-white/5 border border-white/10 transition-colors">
+                    <X size={18} />
+                </button>
+            </div>
+
+            {/* Cropping Drag Frame Container */}
+            <div 
+                className="relative w-full aspect-square bg-slate-950 border border-white/5 rounded-[2.5rem] overflow-hidden cursor-move select-none shadow-[0_0_15px_rgba(16,185,129,0.05)]"
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+            >
+                {/* 🛡️ Inner Visual SQUARE ROUNDED Crop Guideline (Not Circle) */}
+                <div className="absolute inset-0 z-20 pointer-events-none border-[6px] border-slate-950/60 rounded-[2.5rem] shadow-[0_0_0_999px_rgba(2,6,23,0.7)] flex items-center justify-center">
+                    {/* Ye frame profile picture ke 'rounded-xl' se match karne ke liye design hai */}
+                    <div className="w-[280px] h-[280px] rounded-[2.5rem] border-2 border-dashed border-emerald-400/60 shadow-[0_0_30px_rgba(16,185,129,0.15)] bg-transparent"></div>
+                </div>
+
+                {/* Dynamic Scalable Image Layer */}
+                <div 
+                    className="absolute w-full h-full flex items-center justify-center transition-transform duration-75 ease-out pointer-events-none"
+                    style={{
+                        transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`
+                    }}
+                >
+                    <img 
+                        ref={imageRef}
+                        src={rawImageSrc} 
+                        alt="Crop Workspace" 
+                        className="max-w-full max-h-full object-contain"
+                        draggable={false}
+                    />
+                </div>
+            </div>
+
+            {/* ... Rest of the modal: Scale Slider, Action Footer (Ye same rahega par smoothCloseModal call karna) ... */}
+            <div className="relative z-10 mt-5 space-y-2">
+                <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <span>Zoom Adjustment</span>
+                    <span className="text-blue-400">{Math.round(scale * 100)}%</span>
+                </div>
+                <input 
+                    type="range" 
+                    min="1" 
+                    max="3" 
+                    step="0.05" 
+                    value={scale}
+                    onChange={(e) => setScale(parseFloat(e.target.value))}
+                    className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                />
+            </div>
+
+            {/* Modal Action Footer */}
+            <div className="relative z-10 flex gap-3 mt-6">
+                <button 
+                    onClick={smoothCloseModal} // ✨ Smooth close
+                    className="flex-1 font-black py-3 rounded-xl uppercase tracking-widest text-[10px] bg-slate-800 border border-white/5 text-slate-400 hover:bg-slate-700 transition"
+                >
+                    Cancel
+                </button>
+                <button 
+                    onClick={() => { handleCropSave(); smoothCloseModal(); }} // ✨ Crop & Apply and Smooth Close
+                    className="flex-[2] font-black py-3 rounded-xl uppercase tracking-widest text-[10px] bg-emerald-600/20 border border-emerald-500/30 border-t-emerald-400/50 text-emerald-400 hover:text-white hover:bg-emerald-600/40 transition"
+                >
+                    Crop & Apply
+                </button>
+            </div>
+        </div>
+    </div>            )}
         </div>
     );
 };

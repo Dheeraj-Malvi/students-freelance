@@ -51,7 +51,6 @@ const PostJob = ({ isOpen, onClose, onJobAdded }) => {
           title: formData.title,
           category: formData.category,
           price: formData.price,
-          rating: "5.0",
           user_id: user.id
         }]);
 

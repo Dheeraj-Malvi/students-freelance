@@ -41,8 +41,8 @@ const MyGigs = () => {
             <div className="max-w-7xl mx-auto">
                 <div className="flex justify-between items-end mb-10">
                     <div>
-                        <h1 className="text-4xl font-black text-white uppercase italic tracking-tighter">My <span className="text-blue-500">Gigs</span></h1>
-                        <p className="text-slate-500 text-[10px] font-bold uppercase tracking-[0.2em] mt-2">Manage your active postings and talent</p>
+                        <h1 className="text-4xl font-black text-white uppercase tracking-tighter">My <span className="text-blue-500">Gigs</span></h1>
+                        <p className="text-slate-500 text-[10px] italic font-bold uppercase tracking-[0.2em] mt-2">Manage your active postings and talent</p>
                     </div>
                 </div>
 

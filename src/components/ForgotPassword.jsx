@@ -91,9 +91,9 @@ const ForgotPassword = () => {
             </div>
 
 
-            <button
-              disabled={loading}
-              className="w-full relative group overflow-hidden font-black py-4 rounded-xl transition-all duration-300 active:scale-95 mt-4 uppercase tracking-widest text-xs
+<button
+  disabled={loading}
+  className="w-full relative group/btn overflow-hidden font-black py-4 rounded-xl transition-all duration-300 active:scale-95 mt-4 uppercase tracking-widest text-xs
     /* Glass Effect Base: Violet/Indigo Theme */
     bg-indigo-600/20 backdrop-blur-md 
     /* Borders: High-shine edges */
@@ -104,16 +104,15 @@ const ForgotPassword = () => {
     shadow-[0_0_20px_rgba(79,70,229,0.1)]
     hover:shadow-[0_0_30px_rgba(79,70,229,0.3)]
     hover:bg-indigo-600/40
-    disabled:opacity-50"
-            >
-              {/* Glass Shine Animation Layer (The Shimmer) */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
+    disabled:opacity-50 disabled:cursor-not-allowed"
+>
+  {/* ✨ Isolated Indigo Glassy Shine Laser Swipe */}
+  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 ease-out pointer-events-none" />
 
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                {loading ? "Sending..." : "Send Reset Link"}
-              </span>
-            </button>
-
+  <span className="relative z-10 flex items-center justify-center gap-2">
+    {loading ? "Sending..." : "Send Reset Link"}
+  </span>
+</button>
           </form>
 
 

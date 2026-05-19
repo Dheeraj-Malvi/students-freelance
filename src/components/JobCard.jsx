@@ -1,27 +1,34 @@
 import React from 'react';
 import { Clock, DollarSign, Star } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-const JobCard = ({ title, category, price, rating, created_at }) => {
-  
+const JobCard = ({ title, category, price, created_at }) => {
+
   // Dynamic Time Helper Function
   const formatTimeAgo = (dateString) => {
     if (!dateString) return "Just now";
-    
+
     const now = new Date();
     const postedDate = new Date(dateString);
     const diffInSeconds = Math.floor((now - postedDate) / 1000);
 
     if (diffInSeconds < 60) return "Just now";
-    
+
     const minutes = Math.floor(diffInSeconds / 60);
     if (minutes < 60) return `${minutes}m ago`;
-    
+
     const hours = Math.floor(minutes / 60);
     if (hours < 24) return `${hours}h ago`;
-    
+
     const days = Math.floor(hours / 24);
     return `${days}d ago`;
   };
+  const navigate = useNavigate(); // 👈 Navigate hook for redirection
+
+  const handleApplyClick = (e) => {
+  e.stopPropagation(); // Card click event ko rokne ke liye
+  navigate('/login');  // Seedhe login page par fenko!
+};
 
   return (
     // Outer Wrapper for Hover Scale & Shadow
@@ -41,10 +48,9 @@ const JobCard = ({ title, category, price, rating, created_at }) => {
           <span className="bg-blue-500/10 text-blue-400 text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest border border-blue-400/20 backdrop-blur-md">
             {category}
           </span>
-
-          <div className="flex items-center text-yellow-500 gap-1 bg-yellow-500/10 px-2.5 py-1 rounded-lg border border-yellow-500/20 mr-8 lg:mr-0 group-hover:mr-8 transition-all duration-300">
-            <Star className="w-3.5 h-3.5 fill-current" />
-            <span className="text-xs font-black">{rating}</span>
+          <div className="flex items-center gap-0.5 text-emerald-400 font-bold bg-emerald-500/5 backdrop-blur-md px-3 py-1.5 rounded-full border border-emerald-500/20">
+            <DollarSign className="w-4 h-4" />
+            <span className="text-base tracking-tight">{price}</span>
           </div>
         </div>
 
@@ -60,14 +66,12 @@ const JobCard = ({ title, category, price, rating, created_at }) => {
             {/* UPDATED TIME LOGIC HERE */}
             <span className="font-medium text-[13px]">{formatTimeAgo(created_at)}</span>
           </div>
-          <div className="flex items-center gap-0.5 text-emerald-400 font-bold bg-emerald-500/5 backdrop-blur-md px-3 py-1.5 rounded-full border border-emerald-500/20">
-            <DollarSign className="w-4 h-4" />
-            <span className="text-base tracking-tight">{price}</span>
-          </div>
+
         </div>
 
         {/* Action Button */}
-        <button className="w-full relative overflow-hidden bg-white/5 hover:bg-white/10 text-white py-3.5 rounded-2xl font-bold transition-all duration-300 border border-white/10 hover:border-blue-500/50 hover:text-blue-200 group-hover:shadow-[0_0_30px_rgba(37,99,235,0.2)]">
+        <button onClick={handleApplyClick} className="w-full relative group overflow-hidden bg-white/5 hover:bg-white/10 text-white py-3.5 rounded-2xl font-bold transition-all duration-300 border border-white/10 hover:border-blue-500/50 hover:text-blue-200 hover:shadow-[0_0_30px_rgba(37,99,235,0.2)]">
+          <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></span>
           <span className="relative z-10">Apply Now</span>
         </button>
       </div>
