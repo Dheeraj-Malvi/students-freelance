@@ -51,7 +51,8 @@ const Login = () => {
         if (profile) {
           console.log("Profile found, going home");
           navigate('/dashboard', { replace: true });
-        } else {
+        }
+         else {
           console.log("No profile found, going to setup");
           navigate('/profiledetails', { replace: true });
         }
