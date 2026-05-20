@@ -33,7 +33,7 @@ const checkRecovery = async () => {
     checkRecovery();
     }, [navigate]);
 
-    const handleUpdate = async (e) => {
+const handleUpdate = async (e) => {
         e.preventDefault();
         if (password !== confirmPassword) {
             setMessage("Bhai, dono password match nahi ho rahe!");
@@ -41,17 +41,25 @@ const checkRecovery = async () => {
             return;
         }
         setLoading(true);
+        
+        // 1. Password update request bhejo
         const { error } = await supabase.auth.updateUser({ password });
 
         if (error) {
             setMessage(`${error.message}`);
             setStatus('error');
+            setLoading(false);
         } else {
             setMessage('Password updated successfully! Redirecting to login...');
             setStatus('success');
-            setTimeout(() => navigate('/login'), 3000);
+            
+            await supabase.auth.signOut();
+
+            setTimeout(() => {
+                navigate('/login', { replace: true });
+                setLoading(false);
+            }, 3000); 
         }
-        setLoading(false);
     };
 
     return (
