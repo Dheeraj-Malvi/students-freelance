@@ -1,14 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-
 import { supabase } from '../lib/supabaseClient';
-
 import { useNavigate } from 'react-router-dom';
 
-
-
 const AuthContext = createContext({});
-
-
 
 export const AuthProvider = ({ children }) => {
 
@@ -17,8 +11,6 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
-
-
 
   useEffect(() => {
 
@@ -32,8 +24,6 @@ export const AuthProvider = ({ children }) => {
 
     });
 
-
-
     // Listen for login/logout
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -42,11 +32,7 @@ export const AuthProvider = ({ children }) => {
 
       setLoading(false);
 
-   
-
       console.log("Supabase Auth Event Triggered:", event); // Debugging ke liye track karo bhai
-
-
 
       // 🌟 FIX 1: Agar PASSWORD_RECOVERY event mila, toh turant update-password bhejo aur yahin rok do
 
@@ -60,61 +46,41 @@ export const AuthProvider = ({ children }) => {
 
       }
 
-
-
       // 🌟 FIX 2: Normal Signed In login/signup check
 
+// 🌟 FIX 2: Normal Signed In login/signup check
       if (event === 'SIGNED_IN' && session) {
-
-       
-
-        // Ek aur backup check: Agar user already update-password page par khada hai, toh use mat cheedo
-
+        
+        // 1. Agar user already update-password page par hai, toh block karo
         if (window.location.pathname === '/update-password') {
-
           return;
-
         }
-
-
 
         const currentPath = window.location.pathname;
 
-        if (currentPath !== '/' && currentPath !== '/login' && currentPath !== '/signup' && currentPath !== '') {
-
-          console.log(`User is already on ${currentPath}. Blocking auto-redirect to setup page.`);
-
-          return; // Yahin se code rok diya, redirection cancel!
-
+        if (currentPath === '/' || currentPath === '/dashboard' || currentPath === '/profiledetails') {
+          console.log(`User is already on ${currentPath}. Blocking auto-redirect.`);
+          return; 
         }
 
-
-
-        // Chota sa delay taaki Supabase session background me stable ho jaye
+        // 3. ✨ METADATA CHECK: Check karo profile complete hai ya nahi
+        const isSetupComplete = session.user?.user_metadata?.setup_complete;
 
         setTimeout(() => {
-
-          // Agar normal login hai aur recovery nahi chal rahi, tabhi setup par bhejo
-
-          console.log("Normal Login/Signup! Sending to profile-setup...");
-
-          navigate('/profile-setup', { replace: true });
-
-        }, 500);
-
+          if (isSetupComplete) {
+            console.log("Profile already setup! Sending to Dashboard...");
+            navigate('/dashboard', { replace: true });
+          } else {
+            console.log("Profile setup pending! Sending to profile-setup...");
+            navigate('/profile-setup', { replace: true });
+          }
+        }, 200);
       }
-
-   
-
     });
-
-
 
     return () => subscription.unsubscribe();
 
   }, [navigate]);
-
- 
 
   const signOut = async () => {
 
@@ -124,20 +90,12 @@ export const AuthProvider = ({ children }) => {
 
   }
 
-
-
   return (
-
     <AuthContext.Provider value={{ user, loading, signOut }}>
-
       {!loading && children}
-
     </AuthContext.Provider>
-
   );
 
 };
-
-
 
 export const useAuth = () => useContext(AuthContext);
