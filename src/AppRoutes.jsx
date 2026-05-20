@@ -19,6 +19,7 @@ import ProfileDetails from './components/ProfileDetails.jsx'
 import MyApplications from './components/MyApplications.jsx'
 import ManageGig from './components/ManageGig.jsx'
 import PublicRoute from './components/PublicRoute.jsx'
+import ProfileSetup from './components/ProfileSetup.jsx'
 
 export default function AppRoutes() {
     const { user, loading } = useAuth();
@@ -37,12 +38,13 @@ export default function AppRoutes() {
                 </Route>
 
                 {/* 🔓 Open Route */}
+                <Route path="profile-setup" element={<ProfileSetup />} />
 
                 {/* 🔐 PROTECTED DASHBOARD ROUTES */}
                 <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
                     <Route path="dashboard" element={<Dashboard />} />
-                    <Route path="profiledetails" element={<ProfileDetails />} />
                     <Route path="my-applications" element={<MyApplications />} />
+                    <Route path="profiledetails" element={<ProfileDetails />} />
                     <Route path="manage-gig" element={<ManageGig />} />
                     <Route path="my-gigs" element={<MyGigs />} />
                     <Route path="manage-gig/:jobId" element={<ManageGig />} />

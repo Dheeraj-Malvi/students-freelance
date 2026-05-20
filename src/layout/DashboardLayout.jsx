@@ -5,6 +5,7 @@ import {
     LayoutDashboard, Briefcase, UserCircle, LogOut,
     Bell, Menu, ChevronLeft, ChevronRight
 } from 'lucide-react';
+import { supabase } from '../lib/supabaseClient';
 
 const DashboardLayout = () => {
     const { user, signOut } = useAuth();
@@ -13,13 +14,34 @@ const DashboardLayout = () => {
     const userRole = user?.user_metadata?.role;
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [dbUsername, setDbUsername] = useState('');
 
     useEffect(() => {
-        const handleResize = () => { if (window.innerWidth >= 768) setIsSidebarOpen(true); };
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+        const getLatestUsername = async () => {
+            if (!user?.id) return;
 
+            try {
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('username') // Sirf username column fetch karo
+                    .eq('id', user.id)
+                    .maybeSingle(); // `.single()` ki jagah `.maybeSingle()` use karo, agar row khali hogi toh crash nahi karega
+
+                if (error) {
+                    console.error("Supabase Fetch Error:", error);
+                    return;
+                }
+
+                if (data && data.username) {
+                    setDbUsername(data.username);
+                }
+            } catch (err) {
+                console.error("Error fetching username:", err);
+            }
+        };
+
+        getLatestUsername();
+    }, [user?.id, location.pathname]);
     const closeSidebarOnMobile = () => {
         if (window.innerWidth < 768) {
             setIsSidebarOpen(false);
@@ -117,13 +139,24 @@ const DashboardLayout = () => {
                                     />
                                 ) : (
                                     /* 🛡️ Fallback Initials (Agar photo nahi hai) */
-                                    <span className="text-white font-black text-xs uppercase tracking-wider">
-                                        {user?.user_metadata?.full_name
-                                            ? user.user_metadata.full_name.split(' ').map(n => n[0]).join('').slice(0, 2)
-                                            : "DM"
-                                        }
-                                    </span>
-                                )}
+                                        <span className="text-white font-black text-xs uppercase tracking-wider">
+                                            {(() => {
+                                                const fullName = user?.user_metadata?.full_name?.trim();
+                                                if (!fullName) return "U";
+
+                                                const nameParts = fullName.split(/\s+/); // Saari extra spaces handle karne ke liye split
+
+                                                if (nameParts.length === 1) {
+                                                    // Agar single word name hai toh uske pehle 2 letters dikhao (e.g., "Dheeraj" -> "DH")
+                                                    return nameParts[0].slice(0, 2).toUpperCase();
+                                                } else {
+                                                    // Agar multiple words hain (First, Middle, Last), toh sirf First aur Last uthao
+                                                    const firstInitial = nameParts[0][0];
+                                                    const lastInitial = nameParts[nameParts.length - 1][0];
+                                                    return `${firstInitial}${lastInitial}`.toUpperCase();
+                                                }
+                                            })()}
+                                        </span>)}
                             </button>
                             {isProfileOpen && (
                                 <>
@@ -132,7 +165,13 @@ const DashboardLayout = () => {
                                         <div className="px-4 py-3 border-b border-white/5 bg-white/5">
                                             <p className="text-[10px] text-blue-400 font-black uppercase tracking-widest mb-1">{userRole}</p>
                                             <p className="text-white font-bold text-sm truncate">{user?.user_metadata?.full_name}</p>
-                                            <p className="text-slate-500 text-[10px] truncate">{user?.email}</p>
+                                            <p className="text-emerald-400 text-[11px] font-medium truncate mb-0.5">
+                                                @{dbUsername ||
+                                                    user?.user_metadata?.username ||
+                                                    user?.user_metadata?.full_name?.toLowerCase().replace(/\s+/g, '') ||
+                                                    user?.email?.split('@')[0] ||
+                                                    'user'}
+                                            </p>                                            <p className="text-slate-500 text-[10px] truncate">{user?.email}</p>
                                         </div>
                                         <div className="p-1">
                                             <Link
