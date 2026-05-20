@@ -34,10 +34,10 @@ export default function AppRoutes() {
                     <Route path="login" element={<Login />} />
                     <Route path="signup" element={<Signup />} />
                     <Route path="forgot-password" element={<ForgotPassword />} />
-                    <Route path="update-password" element={<UpdatePassword />} />
                 </Route>
 
                 {/* 🔓 Open Route */}
+                <Route path="update-password" element={<UpdatePassword />} />
                 <Route path="profile-setup" element={<ProfileSetup />} />
 
                 {/* 🔐 PROTECTED DASHBOARD ROUTES */}
