@@ -75,7 +75,7 @@ const ProfileDetails = () => {
         );
     }
 
-// 📸 1. Image Select handler (Popup Trigger)
+    // 📸 1. Image Select handler (Popup Trigger)
     const handleImageChange = (e) => {
         if (!isEditing) return;
         const file = e.target.files[0];
@@ -84,6 +84,10 @@ const ProfileDetails = () => {
                 setMessage("Error: Image size should be less than 2MB");
                 return;
             }
+
+            // ✨ FIX: Sahi image select hote hi purana error message saaf karo!
+            setMessage('');
+
             const reader = new FileReader();
             reader.onload = () => {
                 setRawImageSrc(reader.result);
@@ -93,7 +97,7 @@ const ProfileDetails = () => {
                 setTimeout(() => setIsCropModalVisible(true), 10); // Delay for animation trigger
             };
             reader.readAsDataURL(file);
-            e.target.value = null; // Clear input field
+            e.target.value = null; // Clear input field so same file can be re-selected
         }
     };
 
@@ -372,7 +376,9 @@ const handleCropSave = () => {
                                 {isExistingUser && (
                                     <button
                                         type="button"
-                                        onClick={() => setIsEditing(false)}
+                                        onClick={() => {
+                                            setIsEditing(false)
+                                            setMessage('');}}
                                         className="flex-1 font-black py-4 rounded-2xl uppercase tracking-widest text-xs bg-slate-800 border border-white/5 text-slate-400"
                                     >
                                         Cancel
