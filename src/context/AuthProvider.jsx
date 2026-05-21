@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }) => {
 
         const currentPath = window.location.pathname;
 
-        if (currentPath === '/' || currentPath === '/dashboard' || currentPath === '/profiledetails') {
+        if (currentPath !== '/' && currentPath !== '/login' && currentPath !== '/signup') {
           console.log(`User is already on ${currentPath}. Blocking auto-redirect.`);
           return; 
         }
