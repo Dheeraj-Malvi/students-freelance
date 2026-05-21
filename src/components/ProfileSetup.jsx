@@ -19,7 +19,7 @@ const ProfileSetup = () => {
     const [previewUrl, setPreviewUrl] = useState(null);
 
     useEffect(() => {
-        // User metadata se role uthana aur lock kar dena
+        // User will pick role during registration, so we can safely assume it's always present in metadata. But just in case, we check before setting.
         if (user?.user_metadata?.role) {
             setRole(user.user_metadata.role);
         }
@@ -39,18 +39,17 @@ const ProfileSetup = () => {
     const handleImageChange = (e) => {
         const file = e.target.files[0];
 
-        // 🌟 1. Nayi image aate hi sabse pehle error message saaf karo
         setMessage('');
 
         if (file) {
-            if (file.size > 2 * 1024 * 1024) { // 2MB check
+            if (file.size > 2 * 1024 * 1024) { // 1. 2MB check
                 setMessage("Error: Image size should be less than 2MB");
                 setAvatarFile(null);
                 setPreviewUrl(null);
                 return;
             }
 
-            // 🌟 2. Agar size 2MB se kam hai, toh bina kisi error ke normal set ho jayega
+            // 2. If size is less than 2 mb
             setAvatarFile(file);
             setPreviewUrl(URL.createObjectURL(file));
         }
@@ -90,7 +89,7 @@ const ProfileSetup = () => {
                 id: user.id,
                 full_name: fullName,
                 bio: bio,
-                role: role, // Lock kiya hua role hi save hoga
+                role: role,
                 updated_at: new Date(),
                 avatar_url: avatarUrl,
                 username: username,
@@ -176,7 +175,6 @@ const ProfileSetup = () => {
                                         <button
                                             key={r}
                                             type="button"
-                                            // 🌟 onClick hata diya taaki unclickable ho jaye, aur semantic standard bna rhe
                                             className={`py-2.5 rounded-xl border capitalize font-bold text-[11px] tracking-widest transition-all cursor-not-allowed ${isSelected
                                                 ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)] opacity-100'
                                                 : 'bg-slate-950/20 border-white/5 text-slate-600 opacity-40' // Non-selected toggle ko aur zyada fade kar diya
@@ -240,7 +238,6 @@ const ProfileSetup = () => {
                             </div>
                         </div>
 
-                        {/* Submit Button */}
                         <button
                             disabled={loading}
                             className="w-full relative group/btn overflow-hidden font-black py-4 rounded-2xl transition-all duration-300 active:scale-95 mt-4 uppercase tracking-widest text-xs bg-emerald-600/20 backdrop-blur-md border border-emerald-500/30 border-t-emerald-400/50 text-emerald-400 hover:text-white shadow-[0_0_20px_rgba(16,185,129,0.1)] hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] hover:bg-emerald-600/40 flex items-center justify-center gap-2"

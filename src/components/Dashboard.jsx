@@ -180,7 +180,7 @@ const Dashboard = () => {
                 <PostJob 
                     isOpen={isPostModalOpen} 
                     onClose={() => setIsPostModalOpen(false)} 
-                    onJobAdded={fetchGigs} 
+                    onJobAdded={fetchDashboardData} 
                 />
             )}
         </>
@@ -203,7 +203,6 @@ const GigCard = ({ item, userRole, isAlreadyApplied, onApply, navigate }) => (
                     : 'bg-blue-600/10 hover:bg-white/10 text-white border-white/10 hover:border-blue-500/50 hover:text-blue-200 shadow-[0_0_20px_rgba(37,99,235,0.1)] hover:shadow-[0_0_30px_rgba(37,99,235,0.3)]'
                 }`}
         >
-            {/* ✨ Glassy Shine Effect: Only when NOT applied */}
             {!isAlreadyApplied && (
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out pointer-events-none"></div>
             )}
