@@ -45,9 +45,9 @@ export default function AppRoutes() {
                     <Route path="dashboard" element={<Dashboard />} />
                     <Route path="my-applications" element={<MyApplications />} />
                     <Route path="profiledetails" element={<ProfileDetails />} />
-                    <Route path="manage-gig" element={<ManageGig />} />
-                    <Route path="my-gigs" element={<MyGigs />} />
+                    {/* <Route path="manage-gig" element={<ManageGig />} /> */}
                     <Route path="manage-gig/:jobId" element={<ManageGig />} />
+                    <Route path="my-gigs" element={<MyGigs />} />
 
                     <Route path="client-home" element={<ClientHome />} />
                     <Route path="student-home" element={<StudentHome jobs={[]} />} />
