@@ -90,10 +90,10 @@ const MyApplications = () => {
 
                                     <div className="flex items-center gap-6">
                                         <div className="text-right hidden sm:block">
-                                            <div className={`text-[10px] w-fit font-black uppercase px-3 py-1 rounded-full border ${app.status === 'accepted' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
-                                                    app.status === 'accepted' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 
-                                                    app.status === 'pending' ? 'bg-blue-500/10 border-blue-500/20 text-blue-400' : 
-                                                    'bg-red-500/10 border-red-500/20 text-red-500'
+                                            <div className={`text-[10px] w-fit font-black uppercase px-3 py-1 rounded-full border 
+                                            ${app.status === 'approved' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
+                                                    app.status === 'pending' ? 'bg-blue-500/10 border-blue-500/20 text-blue-400' :
+                                                        'bg-red-500/10 border-red-500/20 text-red-500'
                                                 }`}>
                                                 {app.status || 'pending'}
                                             </div>
