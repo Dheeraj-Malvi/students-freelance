@@ -80,7 +80,7 @@ const Dashboard = () => {
     return (
         <>
             <div className="mb-6">
-                <h2 className="text-xl md:text-2xl mb-1 font-bold text-white uppercase tracking-tight">
+                <h2 className="text-xl md:text-2xl mb-1 font-bold  italic text-white uppercase tracking-tight">
                     Welcome Back, <span className="text-blue-500">{user?.user_metadata?.full_name?.split(' ')[0]}</span> 👋
                 </h2>
                 <span className="text-sm text-slate-500 mb-4 tracking-widest">

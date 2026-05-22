@@ -53,8 +53,8 @@ const MyApplications = () => {
 
     return (
         <div className="min-h-screen bg-slate-950">
-            <div className="max-w-4xl mx-auto">
-                <h1 className="text-3xl font-black text-white mb-2 uppercase tracking-tighter italic">
+            <div className="max-w-6xl mx-auto">
+                <h1 className="text-2xl font-black text-white mb-2 uppercase tracking-tighter italic">
                     Your <span className="text-emerald-500">Applications</span>
                 </h1>
                 <p className="text-slate-500 text-sm mb-8 font-bold uppercase tracking-widest">
