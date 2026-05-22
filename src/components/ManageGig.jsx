@@ -5,18 +5,19 @@ import { ArrowLeft, User, Mail, Check, X, Loader, Code } from 'lucide-react';
 
 const ManageGig = () => {
     const params = useParams();
-    const jobId = params.id || params.jobId; 
+    const jobId = params.id || params.jobId;
     const navigate = useNavigate();
-    
+
     const [applicants, setApplicants] = useState([]);
     const [loading, setLoading] = useState(true);
     const [jobTitle, setJobTitle] = useState("");
 
-    const fetchApplicants = useCallback(async () => {if (!jobId) {
+    const fetchApplicants = useCallback(async () => {
+        if (!jobId) {
             console.log("❌ DEBUG: URL se jobId hi nahi mili boss!");
             return;
         }
-        
+
         setLoading(true);
         try {
             console.log("🚀 DEBUG 1: Fetching process shuru hua for Job ID:", jobId);
@@ -74,27 +75,53 @@ const ManageGig = () => {
             console.error("🚨 DEBUG GLOBAL CATCH ERROR:", err.message);
         } finally {
             setLoading(false);
-        }}, [jobId]);
+        }
+    }, [jobId]);
 
     useEffect(() => {
         fetchApplicants();
     }, [fetchApplicants]);
 
     // Glassy Approve Handler
-    const handleStatusUpdate = async (applicationId, newStatus) => {
-        try {
-            const { error } = await supabase
-                .from('applications')
-                .update({ status: newStatus })
-                .eq('id', applicationId);
+    const handleStatusUpdate = async (applicationId, newStatus) => {console.log(`📡 BACKEND SYNC SHURU: Application ID: ${applicationId} ko '${newStatus}' karne ka prayas...`);
+    
+    try {
+        // 1. Supabase ke 'applications' table mein row update hit karo
+        const { data, error } = await supabase
+            .from('applications')
+            .update({ status: newStatus }) // 'approved' ya 'rejected' 
+            .eq('id', applicationId)
+            .select(); // Data return karao sync validation ke liye
 
-            if (error) throw error;
-            alert(`Deal ${newStatus === 'accepted' ? 'Approved' : 'Rejected'} Successfully!`);
-            fetchApplicants(); 
-        } catch (err) {
-            alert(err.message);
+        // Agar RLS block karega toh custom check lagate hain
+        if (error) {
+            console.error("❌ SUPABASE DB UPDATE ERROR:", error.message);
+            throw error;
         }
-    };
+
+        // Supabase bina error ke bhi agar empty row return kare due to RLS, check it:
+        if (!data || data.length === 0) {
+            console.warn("⚠️ WARNING: DB me row update nahi hui! Shyad aap is Gig ke asli owner nahi hain.");
+            alert("🚨 Permission Denied: Bhai, aap is gig ke creator nahi ho, isliye status change nahi kar sakte!");
+            return;
+        }
+
+        console.log("🔥 DATABASE SUCCESS RESPONSE:", data);
+
+        // 2. Local State sync karo taaki screen turant update ho jaye
+        setApplicants(prev =>
+            prev.map(app =>
+                app.id === applicationId ? { ...app, status: newStatus } : app
+            )
+        );
+        
+        console.log(`✅ UI STATE SYNCED: Application ${applicationId} successfully updated to ${newStatus}`);
+
+    } catch (err) {
+        console.error("🚨 DATABASE SE SYNC FAIL HO GAYA:", err.message);
+        alert(`Backend error occurred: ${err.message}. Ek baar Supabase ki RLS settings check karein!`);
+    }
+};
 
     return (
         <div className="min-h-screen bg-slate-950 text-white p-6 selection:bg-blue-500/30">
@@ -119,7 +146,7 @@ const ManageGig = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {applicants.map((app) => (
                         <div key={app.id} className="relative p-6 bg-white/[0.02] border border-white/5 rounded-3xl flex flex-col justify-between hover:border-blue-500/30 transition-all duration-500 backdrop-blur-xl shadow-2xl group overflow-hidden">
-                            
+
                             {/* Glassy Glow Effect */}
                             <div className="absolute -right-10 -top-10 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all duration-500" />
 
@@ -139,11 +166,12 @@ const ManageGig = () => {
                                             <span className="text-[10px] text-slate-500">Applied on {new Date(app.created_at).toLocaleDateString()}</span>
                                         </div>
                                     </div>
-                                    <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-full border tracking-wider ${
-                                        app.status === 'accepted' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+
+                                    {/* 🎯 Dynamic Status Chip/Badge (Color & Text Update) */}
+                                    <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-full border tracking-wider transition-all duration-300 ${app.status === 'approved' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
                                         app.status === 'rejected' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
-                                        'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                                    }`}>{app.status}</span>
+                                            'bg-amber-500/10 text-amber-400 border-amber-500/20' // Pending
+                                        }`}>{app.status || 'pending'}</span>
                                 </div>
 
                                 {/* Email display */}
@@ -169,22 +197,35 @@ const ManageGig = () => {
                                 </div>
                             </div>
 
-                            {/* Glassy Action Buttons */}
-                            {app.status === 'pending' && (
-                                <div className="flex gap-3 mt-4 pt-4 border-t border-white/5">
-                                    <button 
-                                        onClick={() => handleStatusUpdate(app.id, 'accepted')} 
+                            {/* 🛠️ Glassy Action Buttons Conditional Flow */}
+                            {app.status === 'pending' || !app.status ? (
+                                <div className="flex gap-3 mt-4 pt-4 border-t border-white/5 animate-fadeIn">
+                                    {/* APPROVE BUTTON */}
+                                    <button
+                                        onClick={() => handleStatusUpdate(app.id, 'approved')}
                                         className="flex-1 py-3 bg-emerald-500/10 hover:bg-emerald-500/20 active:scale-95 border border-emerald-500/30 hover:border-emerald-400 text-emerald-400 text-xs font-black uppercase tracking-wider rounded-2xl flex items-center justify-center gap-1.5 transition-all duration-300 backdrop-blur-md shadow-[0_0_15px_rgba(16,185,129,0.1)] hover:shadow-[0_0_20px_rgba(16,185,129,0.3)]"
                                     >
                                         <Check size={14} strokeWidth={3} /> Approve Deal
                                     </button>
-                                    
-                                    <button 
-                                        onClick={() => handleStatusUpdate(app.id, 'rejected')} 
+
+                                    {/* REJECT BUTTON */}
+                                    <button
+                                        onClick={() => handleStatusUpdate(app.id, 'rejected')}
                                         className="py-3 px-4 bg-white/[0.02] hover:bg-red-500/10 active:scale-95 border border-white/5 hover:border-red-500/30 text-slate-400 hover:text-red-400 rounded-2xl flex items-center justify-center transition-all duration-300 backdrop-blur-md"
+                                        title="Reject Application"
                                     >
                                         <X size={14} />
                                     </button>
+                                </div>
+                            ) : (
+                                /* Action Le liye jaane ke baad static premium layout border */
+                                <div className="mt-4 pt-4 border-t border-white/5 text-center animate-pulse">
+                                    <div className={`py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border ${app.status === 'approved'
+                                        ? 'bg-emerald-500/[0.02] border-emerald-500/10 text-emerald-500/50'
+                                        : 'bg-red-500/[0.02] border-red-500/10 text-red-500/50'
+                                        }`}>
+                                        {app.status === 'approved' ? "🎉 Deal locked with this dev" : "✕ Application archived"}
+                                    </div>
                                 </div>
                             )}
                         </div>
