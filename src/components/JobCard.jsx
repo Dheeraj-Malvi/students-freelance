@@ -26,24 +26,15 @@ const JobCard = ({ title, category, price, created_at }) => {
   const navigate = useNavigate(); // 👈 Navigate hook for redirection
 
   const handleApplyClick = (e) => {
-  e.stopPropagation(); // Card click event ko rokne ke liye
-  navigate('/login');  // Seedhe login page par fenko!
-};
+    e.stopPropagation();
+    navigate('/login');
+  };
 
   return (
-    // Outer Wrapper for Hover Scale & Shadow
     <div className="relative group cursor-pointer transition-all duration-500 hover:scale-[1.02]">
-
-      {/* 1. Liquid Border Glow */}
       <div className="absolute -inset-[1px] bg-gradient-to-br from-blue-500/40 via-transparent to-emerald-500/40 rounded-[2rem] opacity-0 group-hover:opacity-100 blur-[2px] transition-opacity duration-500"></div>
-
-      {/* 2. Main Glass Body */}
       <div className="relative h-full bg-slate-900/40 backdrop-blur-xl border border-white/10 p-7 rounded-[2rem] shadow-2xl overflow-hidden">
-
-        {/* Inner Decor: Liquid Blob */}
         <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-blue-500/10 blur-[50px] rounded-full group-hover:bg-blue-500/20 transition-all duration-700"></div>
-
-        {/* Top Header Section */}
         <div className="flex justify-between items-start mb-5">
           <span className="bg-blue-500/10 text-blue-400 text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest border border-blue-400/20 backdrop-blur-md">
             {category}

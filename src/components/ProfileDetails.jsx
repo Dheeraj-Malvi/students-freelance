@@ -18,7 +18,7 @@ const ProfileDetails = () => {
     const [username, setUsername] = useState('');
     const [skills, setSkills] = useState('');
     const [bio, setBio] = useState('');
-    const [role, setRole] = useState('student'); // Default from your table
+    const [role, setRole] = useState('student'); // Default from the table
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [avatarFile, setAvatarFile] = useState(null);
@@ -27,8 +27,8 @@ const ProfileDetails = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [isExistingUser, setIsExistingUser] = useState(false);
 
-    // --- ✂️ NEW CROPPER MODAL STATES ---
-    const [isCropModalVisible, setIsCropModalVisible] = useState(false); // ✨ Ye animation logic ke liye
+    // --- NEW CROPPER MODAL STATES ---
+    const [isCropModalVisible, setIsCropModalVisible] = useState(false);
     const [isCropModalOpen, setIsCropModalOpen] = useState(false);
     const [rawImageSrc, setRawImageSrc] = useState(null);
     const [scale, setScale] = useState(1);
@@ -85,7 +85,6 @@ const ProfileDetails = () => {
                 return;
             }
 
-            // ✨ FIX: Sahi image select hote hi purana error message saaf karo!
             setMessage('');
 
             const reader = new FileReader();
@@ -102,13 +101,13 @@ const ProfileDetails = () => {
     };
 
     const smoothCloseModal = () => {
-        setIsCropModalVisible(false); // Anime close karo
+        setIsCropModalVisible(false); // close anime
         setTimeout(() => {
             setIsCropModalOpen(false); // DOM se hatao transition khatam hone ke baad
         }, 300); // Transitions duration ke matching delay (300ms)
     };
 
-    // 🖱️ 2. Drag & Position Event Handlers for Cropper
+    // 2. Drag & Position Event Handlers for Cropper
     const handleMouseDown = (e) => {
         setIsDragging(true);
         setDragStart({ x: e.clientX - offset.x, y: e.clientY - offset.y });
@@ -124,61 +123,60 @@ const ProfileDetails = () => {
 
     const handleMouseUp = () => setIsDragging(false);
 
-    // ✂️ 3. Process Canvas Cropping
-const handleCropSave = () => {
-    const canvas = document.createElement('canvas');
-    canvas.width = 300;
-    canvas.height = 300;
-    const ctx = canvas.getContext('2d');
-    const img = new Image();
-    img.src = rawImageSrc;
+    // 3. Process Canvas Cropping
+    const handleCropSave = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 300;
+        canvas.height = 300;
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        img.src = rawImageSrc;
 
-    img.onload = () => {
-        ctx.clearRect(0, 0, 300, 300);
-        ctx.save();
-        
-        // ✨ FIX: Purana arc (circle) hata kar humne yahan Square-Rounded (Path) banaya hai
-        const radius = 40; // Aap is radius ko badha-ghata sakte hain corner roundness adjust karne ke liye
-        ctx.beginPath();
-        ctx.moveTo(radius, 0);
-        ctx.lineTo(300 - radius, 0);
-        ctx.quadraticCurveTo(300, 0, 300, radius);
-        ctx.lineTo(300, 300 - radius);
-        ctx.quadraticCurveTo(300, 300, 300 - radius, 300);
-        ctx.lineTo(radius, 300);
-        ctx.quadraticCurveTo(0, 300, 0, 300 - radius);
-        ctx.lineTo(0, radius);
-        ctx.quadraticCurveTo(0, 0, radius, 0);
-        ctx.closePath();
-        ctx.clip(); // Ab canvas square-rounded clip karega, corners par black spaces nahi aayenge!
+        img.onload = () => {
+            ctx.clearRect(0, 0, 300, 300);
+            ctx.save();
 
-        // Image aspect ratio math
-        const imgRatio = img.width / img.height;
-        let drawWidth = 300;
-        let drawHeight = 300;
+            const radius = 40; 
+            ctx.beginPath();
+            ctx.moveTo(radius, 0);
+            ctx.lineTo(300 - radius, 0);
+            ctx.quadraticCurveTo(300, 0, 300, radius);
+            ctx.lineTo(300, 300 - radius);
+            ctx.quadraticCurveTo(300, 300, 300 - radius, 300);
+            ctx.lineTo(radius, 300);
+            ctx.quadraticCurveTo(0, 300, 0, 300 - radius);
+            ctx.lineTo(0, radius);
+            ctx.quadraticCurveTo(0, 0, radius, 0);
+            ctx.closePath();
+            ctx.clip();
 
-        if (imgRatio > 1) {
-            drawWidth = 300 * imgRatio;
-        } else {
-            drawHeight = 300 / imgRatio;
-        }
+            // Image aspect ratio math
+            const imgRatio = img.width / img.height;
+            let drawWidth = 300;
+            let drawHeight = 300;
 
-        ctx.translate(150 + offset.x, 150 + offset.y);
-        ctx.scale(scale, scale);
-        ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
-        ctx.restore();
-
-        // Convert canvas data to Blob for Supabase upload
-        canvas.toBlob((blob) => {
-            if (blob) {
-                const croppedFile = new File([blob], "avatar.jpg", { type: "image/jpeg" });
-                setAvatarFile(croppedFile);
-                setPreviewUrl(URL.createObjectURL(croppedFile));
-                smoothCloseModal();
+            if (imgRatio > 1) {
+                drawWidth = 300 * imgRatio;
+            } else {
+                drawHeight = 300 / imgRatio;
             }
-        }, 'image/jpeg', 0.9);
+
+            ctx.translate(150 + offset.x, 150 + offset.y);
+            ctx.scale(scale, scale);
+            ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+            ctx.restore();
+
+            // Convert canvas data to Blob for Supabase upload
+            canvas.toBlob((blob) => {
+                if (blob) {
+                    const croppedFile = new File([blob], "avatar.jpg", { type: "image/jpeg" });
+                    setAvatarFile(croppedFile);
+                    setPreviewUrl(URL.createObjectURL(croppedFile));
+                    smoothCloseModal();
+                }
+            }, 'image/jpeg', 0.9);
+        };
     };
-};
     const handleProfileUpdate = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -337,13 +335,13 @@ const handleCropSave = () => {
                             <label className="text-slate-400 text-[10px] font-black uppercase tracking-widest ml-1">Skills</label>
                             <div className="relative flex items-center">
                                 <Briefcase className="absolute left-4 w-4 h-4 text-slate-500" />
-                                <input 
-                                    type="text" 
+                                <input
+                                    type="text"
                                     disabled={!isEditing}
                                     className={`w-full uppercase bg-slate-950/50 border rounded-xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none transition-all ${isEditing ? 'border-emerald-500/50' : 'border-white/10 text-slate-400'}`}
-                                    value={skills} 
-                                    onChange={(e) => setSkills(e.target.value)} 
-                                    required 
+                                    value={skills}
+                                    onChange={(e) => setSkills(e.target.value)}
+                                    required
                                 />
                             </div>
                         </div>
@@ -363,23 +361,27 @@ const handleCropSave = () => {
                             </div>
                         </div>
                         {/* ACTION BUTTONS */}
+                        {/* Profile Actions Control Section */}
                         {!isEditing ? (
                             <button
                                 type="button"
                                 onClick={() => setIsEditing(true)}
-                                className="w-full font-black py-4 rounded-2xl transition-all duration-300 mt-4 uppercase tracking-widest text-xs bg-blue-600/20 border border-blue-500/30 text-blue-400 hover:bg-blue-600/40"
+                                className="w-full relative overflow-hidden bg-blue-600/20 hover:bg-blue-600/30 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all duration-300 border border-white/10 hover:border-blue-500/50 hover:text-blue-200 hover:shadow-[0_0_30px_rgba(37,99,235,0.2)]"
                             >
-                                Edit Profile
+                                {/* FIX: 'group-hover:' ko 'hover:' kiya taaki sirf button hover par chamke */}
+                                <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full transition-transform duration-1000 ease-out [button:hover_&]:translate-x-full"></span>
+                                <span className="relative z-10">Edit Profile</span>
                             </button>
                         ) : (
-                            <div className="flex gap-3 mt-4">
+                            <div className="flex gap-3 mt-4 w-full">
                                 {isExistingUser && (
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            setIsEditing(false)
-                                            setMessage('');}}
-                                        className="flex-1 font-black py-4 rounded-2xl uppercase tracking-widest text-xs bg-slate-800 border border-white/5 text-slate-400"
+                                            setIsEditing(false);
+                                            setMessage('');
+                                        }}
+                                        className="flex-1 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all duration-300 border border-white/10 hover:border-white/20 active:scale-[0.98]"
                                     >
                                         Cancel
                                     </button>
@@ -387,10 +389,21 @@ const handleCropSave = () => {
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="flex-[2] relative group/btn overflow-hidden font-black py-4 rounded-2xl transition-all duration-300 bg-emerald-600/20 border border-emerald-500/30 border-t-emerald-400/50 text-emerald-400 hover:text-white flex items-center justify-center gap-2 uppercase tracking-widest text-xs"
+                                    className="flex-[2] relative group/btn overflow-hidden font-black py-4 rounded-xl transition-all duration-300 active:scale-95 uppercase tracking-widest text-xs bg-emerald-600/20 backdrop-blur-md border border-emerald-500/30 border-t-emerald-400/50 text-emerald-400 hover:text-white shadow-[0_0_20px_rgba(16,185,129,0.1)] hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] hover:bg-emerald-600/40 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                 >
-                                    <span>{loading ? "SAVING..." : "SAVE CHANGES"}</span>
-                                    {!loading && <ArrowRight size={16} />}
+                                    {/* ✨ Liquid Shimmer: Sirf tabhi slide karega jab target is button par aayega */}
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 ease-out pointer-events-none" />
+
+                                    <span className="relative z-10">
+                                        {loading ? "SAVING..." : "SAVE CHANGES"}
+                                    </span>
+
+                                    {!loading && (
+                                        <ArrowRight
+                                            size={14}
+                                            className="relative z-10 transition-transform duration-300 group-hover/btn:translate-x-0.5"
+                                        />
+                                    )}
                                 </button>
                             </div>
                         )}
@@ -400,89 +413,92 @@ const handleCropSave = () => {
 
             {/* CROPPER MODAL */}
             {isCropModalOpen && (
-<div 
-        className={`fixed inset-0 z-[100] flex items-center justify-center p-4 transition-all duration-300 ease-out backdrop-blur-md ${isCropModalVisible ? 'opacity-100 bg-slate-950/80' : 'opacity-0 bg-slate-950/0'}`}
-        onTransitionEnd={() => { if(!isCropModalVisible) smoothCloseModal(); }} // Animation sync
-    >
-        <div className={`relative w-full max-w-md bg-slate-900/90 border border-white/10 rounded-[2rem] p-6 shadow-2xl overflow-hidden group/modal transition-all duration-300 ease-out transform ${isCropModalVisible ? 'scale-100' : 'scale-95'}`}>
-            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-emerald-500 rounded-[2rem] blur opacity-10 group-hover/modal:opacity-20 transition"></div>
-
-            {/* Modal Header */}
-            <div className="relative z-10 flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                    <Sliders size={18} className="text-blue-400" />
-                    Adjust Avatar Photo
-                </h3>
-                <button onClick={smoothCloseModal} className="text-slate-400 hover:text-white p-1 rounded-full bg-white/5 border border-white/10 transition-colors">
-                    <X size={18} />
-                </button>
-            </div>
-
-            {/* Cropping Drag Frame Container */}
-            <div 
-                className="relative w-full aspect-square bg-slate-950 border border-white/5 rounded-[2.5rem] overflow-hidden cursor-move select-none shadow-[0_0_15px_rgba(16,185,129,0.05)]"
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
-            >
-                {/* 🛡️ Inner Visual SQUARE ROUNDED Crop Guideline (Not Circle) */}
-                <div className="absolute inset-0 z-20 pointer-events-none border-[6px] border-slate-950/60 rounded-[2.5rem] shadow-[0_0_0_999px_rgba(2,6,23,0.7)] flex items-center justify-center">
-                    {/* Ye frame profile picture ke 'rounded-xl' se match karne ke liye design hai */}
-                    <div className="w-[280px] h-[280px] rounded-[2.5rem] border-2 border-dashed border-emerald-400/60 shadow-[0_0_30px_rgba(16,185,129,0.15)] bg-transparent"></div>
-                </div>
-
-                {/* Dynamic Scalable Image Layer */}
-                <div 
-                    className="absolute w-full h-full flex items-center justify-center transition-transform duration-75 ease-out pointer-events-none"
-                    style={{
-                        transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`
-                    }}
+                <div
+                    className={`fixed inset-0 z-[100] flex items-center justify-center p-4 transition-all duration-300 ease-out backdrop-blur-md ${isCropModalVisible ? 'opacity-100 bg-slate-950/80' : 'opacity-0 bg-slate-950/0'}`}
+                    onTransitionEnd={() => { if (!isCropModalVisible) smoothCloseModal(); }} // Animation sync
                 >
-                    <img 
-                        ref={imageRef}
-                        src={rawImageSrc} 
-                        alt="Crop Workspace" 
-                        className="max-w-full max-h-full object-contain"
-                        draggable={false}
-                    />
-                </div>
-            </div>
+                    <div className={`relative w-full max-w-md bg-slate-900/90 border border-white/10 rounded-[2rem] p-6 shadow-2xl overflow-hidden group/modal transition-all duration-300 ease-out transform ${isCropModalVisible ? 'scale-100' : 'scale-95'}`}>
+                        <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-emerald-500 rounded-[2rem] blur opacity-10 group-hover/modal:opacity-20 transition"></div>
 
-            {/* ... Rest of the modal: Scale Slider, Action Footer (Ye same rahega par smoothCloseModal call karna) ... */}
-            <div className="relative z-10 mt-5 space-y-2">
-                <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-slate-400">
-                    <span>Zoom Adjustment</span>
-                    <span className="text-blue-400">{Math.round(scale * 100)}%</span>
-                </div>
-                <input 
-                    type="range" 
-                    min="1" 
-                    max="3" 
-                    step="0.05" 
-                    value={scale}
-                    onChange={(e) => setScale(parseFloat(e.target.value))}
-                    className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500"
-                />
-            </div>
+                        {/* Modal Header */}
+                        <div className="relative z-10 flex items-center justify-between mb-4">
+                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                <Sliders size={18} className="text-blue-400" />
+                                Adjust Avatar Photo
+                            </h3>
+                            <button onClick={smoothCloseModal} className="text-slate-400 hover:text-white p-1 rounded-full bg-white/5 border border-white/10 transition-colors">
+                                <X size={18} />
+                            </button>
+                        </div>
 
-            {/* Modal Action Footer */}
-            <div className="relative z-10 flex gap-3 mt-6">
-                <button 
-                    onClick={smoothCloseModal} // ✨ Smooth close
-                    className="flex-1 font-black py-3 rounded-xl uppercase tracking-widest text-[10px] bg-slate-800 border border-white/5 text-slate-400 hover:bg-slate-700 transition"
-                >
-                    Cancel
-                </button>
-                <button 
-                    onClick={() => { handleCropSave(); smoothCloseModal(); }} // ✨ Crop & Apply and Smooth Close
-                    className="flex-[2] font-black py-3 rounded-xl uppercase tracking-widest text-[10px] bg-emerald-600/20 border border-emerald-500/30 border-t-emerald-400/50 text-emerald-400 hover:text-white hover:bg-emerald-600/40 transition"
-                >
-                    Crop & Apply
-                </button>
-            </div>
-        </div>
-    </div>            )}
+                        {/* Cropping Drag Frame Container */}
+                        <div
+                            className="relative w-full aspect-square bg-slate-950 border border-white/5 rounded-[2.5rem] overflow-hidden cursor-move select-none shadow-[0_0_15px_rgba(16,185,129,0.05)]"
+                            onMouseDown={handleMouseDown}
+                            onMouseMove={handleMouseMove}
+                            onMouseUp={handleMouseUp}
+                            onMouseLeave={handleMouseUp}
+                        >
+                            {/* 🛡️ Inner Visual SQUARE ROUNDED Crop Guideline (Not Circle) */}
+                            <div className="absolute inset-0 z-20 pointer-events-none border-[6px] border-slate-950/60 rounded-[2.5rem] shadow-[0_0_0_999px_rgba(2,6,23,0.7)] flex items-center justify-center">
+                                {/* Ye frame profile picture ke 'rounded-xl' se match karne ke liye design hai */}
+                                <div className="w-[280px] h-[280px] rounded-[2.5rem] border-2 border-dashed border-emerald-400/60 shadow-[0_0_30px_rgba(16,185,129,0.15)] bg-transparent"></div>
+                            </div>
+
+                            {/* Dynamic Scalable Image Layer */}
+                            <div
+                                className="absolute w-full h-full flex items-center justify-center transition-transform duration-75 ease-out pointer-events-none"
+                                style={{
+                                    transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`
+                                }}
+                            >
+                                <img
+                                    ref={imageRef}
+                                    src={rawImageSrc}
+                                    alt="Crop Workspace"
+                                    className="max-w-full max-h-full object-contain"
+                                    draggable={false}
+                                />
+                            </div>
+                        </div>
+
+                        {/* ... Rest of the modal: Scale Slider, Action Footer (Ye same rahega par smoothCloseModal call karna) ... */}
+                        <div className="relative z-10 mt-5 space-y-2">
+                            <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                <span>Zoom Adjustment</span>
+                                <span className="text-blue-400">{Math.round(scale * 100)}%</span>
+                            </div>
+                            <input
+                                type="range"
+                                min="1"
+                                max="3"
+                                step="0.05"
+                                value={scale}
+                                onChange={(e) => setScale(parseFloat(e.target.value))}
+                                className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                            />
+                        </div>
+
+                        {/* Modal Action Footer */}
+                        <div className="relative z-10 flex gap-3 mt-6">
+                            <button
+                                onClick={smoothCloseModal} // ✨ Smooth close
+                                className="flex-1 font-black py-3 rounded-xl uppercase tracking-widest text-[10px] bg-slate-800 border border-white/5 text-slate-400 hover:bg-slate-700 transition"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => { handleCropSave(); smoothCloseModal(); }} // ✨ Crop & Apply and Smooth Close
+                                className="flex-[2] relative overflow-hidden bg-white/5 hover:bg-white/10 text-white py-3.5 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all duration-300 border border-white/10 border-t-emerald-500/30 hover:border-emerald-500/50 hover:text-emerald-300 hover:shadow-[0_0_30px_rgba(16,185,129,0.2)] group/crop"
+                            >
+                                {/* Liquid Glassy Shiny Shimmer Track - Triggered only on button hover */}
+                                <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/crop:translate-x-full transition-transform duration-1000 ease-out"></span>
+
+                                <span className="relative z-10">Crop & Apply</span>
+                            </button>            </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
