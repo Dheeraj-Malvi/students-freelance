@@ -114,7 +114,11 @@ const ProfileSetup = () => {
                 navigate('/dashboard');
             }, 2000);
         } catch (error) {
-            setMessage(`Error: ${error.message}`);
+            if (error.message.includes('profiles_username_key') || error.code === '23505') {
+                setMessage('Error: Username is already grabbed! Try a different one.');
+            } else {
+                setMessage(`Error: ${error.message}`);
+            }
         } finally {
             setLoading(false);
         }
@@ -197,13 +201,15 @@ const ProfileSetup = () => {
                         </div>
 
                         {/* Skills */}
-                        <div className="space-y-1.5">
-                            <label className="text-slate-400 text-[10px] font-black uppercase tracking-widest ml-1">Skills</label>
-                            <div className="relative flex items-center">
-                                <Briefcase className="absolute left-4 top-4 w-4 h-4 text-slate-500" />
-                                <input type="text" placeholder="SKILLS (comma-separated)" className="w-full bg-slate-950/50 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-emerald-500/50 transition-all uppercase" value={skills} onChange={(e) => setSkills(e.target.value)} required />
+                        {role === 'student' && (
+                            <div className="space-y-1.5">
+                                <label className="text-slate-400 text-[10px] font-black uppercase tracking-widest ml-1">Skills</label>
+                                <div className="relative flex items-center">
+                                    <Briefcase className="absolute left-4 top-4 w-4 h-4 text-slate-500" />
+                                    <input type="text" placeholder="SKILLS (comma-separated)" className="w-full bg-slate-950/50 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-emerald-500/50 transition-all uppercase" value={skills} onChange={(e) => setSkills(e.target.value)} required />
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         {/* Full Name */}
                         <div className="space-y-1.5">
