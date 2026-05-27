@@ -212,9 +212,12 @@ const ProfileDetails = () => {
                 role: role,
                 updated_at: new Date(),
                 avatar_url: avatarUrl,
-                username: username,
-                skills: skills.split(',').map(s => s.trim()) // Convert comma-separated skills to array
+                skills: role === 'student' ? skills.split(',').map(s => s.trim()).filter(Boolean) : []
             };
+
+            if (!isExistingUser) {  
+                updates.username = username;
+            }
 
             const { error: upsertError } = await supabase.from('profiles').upsert(updates);
             if (upsertError) throw upsertError;
@@ -331,20 +334,22 @@ const ProfileDetails = () => {
                             </div>
                         </div>
 
-                        <div className="space-y-1.5">
-                            <label className="text-slate-400 text-[10px] font-black uppercase tracking-widest ml-1">Skills</label>
-                            <div className="relative flex items-center">
-                                <Briefcase className="absolute left-4 w-4 h-4 text-slate-500" />
-                                <input
-                                    type="text"
-                                    disabled={!isEditing}
-                                    className={`w-full uppercase bg-slate-950/50 border rounded-xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none transition-all ${isEditing ? 'border-emerald-500/50' : 'border-white/10 text-slate-400'}`}
-                                    value={skills}
-                                    onChange={(e) => setSkills(e.target.value)}
-                                    required
-                                />
+                        {role === 'student' && (
+                            <div className="space-y-1.5">
+                                <label className="text-slate-400 text-[10px] font-black uppercase tracking-widest ml-1">Skills</label>
+                                <div className="relative flex items-center">
+                                    <Briefcase className="absolute left-4 w-4 h-4 text-slate-500" />
+                                    <input
+                                        type="text"
+                                        disabled={!isEditing}
+                                        className={`w-full uppercase bg-slate-950/50 border rounded-xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none transition-all ${isEditing ? 'border-emerald-500/50' : 'border-white/10 text-slate-400'}`}
+                                        value={skills}
+                                        onChange={(e) => setSkills(e.target.value)}
+                                        required
+                                    />
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         <div className="space-y-1.5">
                             <label className="text-slate-400 text-[10px] font-black uppercase tracking-widest ml-1">Bio</label>
