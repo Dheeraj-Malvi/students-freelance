@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { ArrowLeft, User, Mail, Check, X, Loader, Code } from 'lucide-react';
 
 const ManageGig = () => {
     const params = useParams();
     const jobId = params.id || params.jobId;
-    const navigate = useNavigate();
 
     const [applicants, setApplicants] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -124,16 +123,12 @@ const ManageGig = () => {
 };
 
     return (
-        <div className="min-h-screen bg-slate-950 text-white p-6 selection:bg-blue-500/30">
-            {/* Back Button */}
-            <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white mb-6 transition-colors duration-300">
-                <ArrowLeft size={14} /> Back to Dashboard
-            </button>
+        <div className="min-h-screen bg-slate-950 text-white -mt-2 selection:bg-blue-500/30">
 
             {/* Header */}
-            <div className="mb-8">
-                <span className="text-[10px] bg-blue-500/10 text-blue-400 font-bold px-2 py-1 rounded uppercase border border-blue-500/20 tracking-wider">Applicants Portal</span>
-                <h2 className="text-2xl font-black mt-2 uppercase tracking-tight">Gig: <span className="text-blue-500">{jobTitle || "Loading..."}</span></h2>
+            <div className="mb-4">
+                {/* <span className="text-[10px] bg-blue-500/10 text-blue-400 font-bold px-2 py-1 rounded uppercase border border-blue-500/20 tracking-wider">Applicants Portal</span> */}
+                <h2 className="text-2xl font-black mt-2 uppercase italic tracking-tight">Applications for Gig: <span className="text-blue-500">{jobTitle || "Loading..."}</span></h2>
             </div>
 
             {loading ? (

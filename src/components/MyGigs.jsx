@@ -38,11 +38,11 @@ const MyGigs = () => {
 
     return (
         <div className="min-h-screen bg-slate-950">
-            <div className="max-w-7xl mx-auto">
-                <div className="flex justify-between items-end mb-10">
+            <div className="max-w-6xl mx-auto">
+                <div className="flex justify-between italic items-end mb-8">
                     <div>
-                        <h1 className="text-4xl font-black text-white uppercase tracking-tighter">My <span className="text-blue-500">Gigs</span></h1>
-                        <p className="text-slate-500 text-[10px] italic font-bold uppercase tracking-[0.2em] mt-2">Manage your active postings and talent</p>
+                        <h1 className="text-2xl font-black text-white uppercase tracking-tighter">My <span className="text-blue-500">Gigs</span></h1>
+                        <p className="text-blue-300 text-xs italic tracking-[0.2em] mt-2">Manage your active postings and talent</p>
                     </div>
                 </div>
 

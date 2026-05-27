@@ -53,8 +53,8 @@ const MyApplications = () => {
 
     return (
         <div className="min-h-screen bg-slate-950">
-            <div className="max-w-4xl mx-auto">
-                <h1 className="text-3xl font-black text-white mb-2 uppercase tracking-tighter italic">
+            <div className="max-w-6xl mx-auto">
+                <h1 className="text-2xl font-black text-white mb-2 uppercase tracking-tighter italic">
                     Your <span className="text-emerald-500">Applications</span>
                 </h1>
                 <p className="text-slate-500 text-sm mb-8 font-bold uppercase tracking-widest">
@@ -90,10 +90,10 @@ const MyApplications = () => {
 
                                     <div className="flex items-center gap-6">
                                         <div className="text-right hidden sm:block">
-                                            <div className={`text-[10px] w-fit font-black uppercase px-3 py-1 rounded-full border ${app.status === 'accepted' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
-                                                    app.status === 'accepted' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 
-                                                    app.status === 'pending' ? 'bg-blue-500/10 border-blue-500/20 text-blue-400' : 
-                                                    'bg-red-500/10 border-red-500/20 text-red-500'
+                                            <div className={`text-[10px] w-fit font-black uppercase px-3 py-1 rounded-full border 
+                                            ${app.status === 'approved' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
+                                                    app.status === 'pending' ? 'bg-blue-500/10 border-blue-500/20 text-blue-400' :
+                                                        'bg-red-500/10 border-red-500/20 text-red-500'
                                                 }`}>
                                                 {app.status || 'pending'}
                                             </div>
