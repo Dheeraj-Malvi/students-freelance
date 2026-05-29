@@ -196,7 +196,7 @@ const GigCard = ({ item, userRole, isAlreadyApplied, onApply, navigate }) => (
         </div>
         <button
             disabled={isAlreadyApplied}
-            onClick={() => userRole === 'student' ? onApply(item.id) : navigate(`/manage-gig/${item.id}`)}
+            onClick={() => userRole === 'student' ? onApply(item.id) : navigate(`/GigApplications/${item.id}`)}
             className={`relative group overflow-hidden text-[10px] px-5 py-2.5 rounded-xl font-black uppercase flex items-center gap-2 transition-all duration-300 border 
     ${isAlreadyApplied
                     ? 'bg-slate-800 text-slate-500 border-white/5 cursor-not-allowed'

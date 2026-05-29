@@ -6,6 +6,7 @@ import {
     Bell, Menu, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
+import { Sliders } from 'lucide-react';
 
 const DashboardLayout = () => {
     const { user, signOut } = useAuth();
@@ -97,6 +98,16 @@ const DashboardLayout = () => {
                         isOpen={isSidebarOpen}
                         onClick={closeSidebarOnMobile}
                     />
+                    {userRole === 'client' &&
+                        <NavItem
+                            icon={<Sliders size={20} />}
+                            label='Manage Gigs'
+                            to='/manage-gigs'
+                            active={location.pathname === '/my-applications' || location.pathname === '/manage-gigs'}
+                            isOpen={isSidebarOpen}
+                            onClick={closeSidebarOnMobile}
+                        />
+                    }
 
                     {/* Profile */}
                     <NavItem

@@ -39,10 +39,10 @@ const MyGigs = () => {
     return (
         <div className="min-h-screen bg-slate-950">
             <div className="max-w-6xl mx-auto">
-                <div className="flex justify-between italic items-end mb-8">
+                <div className="flex justify-between italic border-b border-white/10 pb-4 items-end mb-8">
                     <div>
-                        <h1 className="text-2xl font-black text-white uppercase tracking-tighter">My <span className="text-blue-500">Gigs</span></h1>
-                        <p className="text-blue-300 text-xs italic tracking-[0.2em] mt-2">Manage your active postings and talent</p>
+                        <h2 className="text-2xl sm:text-2xl md:text-2xl font-black mb-2 tracking-tighter uppercase text-white">Review <span className="text-blue-500">Applications</span></h2>
+                        <p className="text-blue-300 text-xs italic tracking-[0.2em] mt-2">Manage responses, lock deals</p>
                     </div>
                 </div>
 
@@ -71,7 +71,7 @@ const MyGigs = () => {
                                         </span>
                                     </div>
                                     <button 
-                                        onClick={() => navigate(`/manage-gig/${gig.id}`)}
+                                        onClick={() => navigate(`/GigApplications/${gig.id}`)}
                                         className="flex items-center gap-2 text-blue-500 text-[10px] font-black uppercase tracking-widest hover:text-white transition-colors"
                                     >
                                         Manage <ChevronRight size={14} />
