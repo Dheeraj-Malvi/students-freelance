@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { ArrowLeft, User, Mail, Check, X, Loader, Code } from 'lucide-react';
 
-const ManageGig = () => {
+const GigApplications = () => {
     const params = useParams();
     const jobId = params.id || params.jobId;
 
@@ -231,4 +231,4 @@ const ManageGig = () => {
     );
 };
 
-export default ManageGig;
+export default GigApplications;

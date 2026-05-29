@@ -19,7 +19,7 @@ function App() {
     if (!error) setJobs(data);
   };
 
-  const hideNavbarPages = ['/login', '/signup', '/profiledetails', '/forgot-password', '/update-password', '/dashboard', '/client-home', '/student-home', '/my-gigs', '/my-applications', '/manage-gig'];
+  const hideNavbarPages = ['/login', '/signup', '/profiledetails', '/forgot-password', '/update-password', '/dashboard', '/client-home', '/student-home', '/my-gigs', '/my-applications', '/GigApplications'];
 
   // 1. CHECK IF CURRENT PATH STARTS WITH ANY OF THE HIDDEN PAGES
   const isInsideHiddenPages = hideNavbarPages.some(page => location.pathname.startsWith(page));

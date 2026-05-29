@@ -17,9 +17,10 @@ import MyGigs from './components/MyGigs.jsx'
 import DashboardLayout from './layout/DashboardLayout.jsx'
 import ProfileDetails from './components/ProfileDetails.jsx'
 import MyApplications from './components/MyApplications.jsx'
-import ManageGig from './components/ManageGig.jsx'
+// import ManageGig from './components/ManageGig.jsx'
 import PublicRoute from './components/PublicRoute.jsx'
 import ProfileSetup from './components/ProfileSetup.jsx'
+import GigApplications from './components/GigApplications.jsx'
 
 export default function AppRoutes() {
     const { user, loading } = useAuth();
@@ -46,7 +47,7 @@ export default function AppRoutes() {
                     <Route path="my-applications" element={<MyApplications />} />
                     <Route path="profiledetails" element={<ProfileDetails />} />
                     {/* <Route path="manage-gig" element={<ManageGig />} /> */}
-                    <Route path="manage-gig/:jobId" element={<ManageGig />} />
+                    <Route path="GigApplications/:jobId" element={<GigApplications />} />
                     <Route path="my-gigs" element={<MyGigs />} />
 
                     <Route path="client-home" element={<ClientHome />} />

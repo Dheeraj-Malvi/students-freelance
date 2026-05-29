@@ -71,7 +71,7 @@ const MyGigs = () => {
                                         </span>
                                     </div>
                                     <button 
-                                        onClick={() => navigate(`/manage-gig/${gig.id}`)}
+                                        onClick={() => navigate(`/GigApplications/${gig.id}`)}
                                         className="flex items-center gap-2 text-blue-500 text-[10px] font-black uppercase tracking-widest hover:text-white transition-colors"
                                     >
                                         Manage <ChevronRight size={14} />
