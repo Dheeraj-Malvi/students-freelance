@@ -34,6 +34,13 @@ const PostJob = ({ isOpen, onClose, onJobAdded }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // 🚫 Stop $0 or negative values instantly
+    if (!formData.price || Number(formData.price) <= 0) {
+      alert("Price should be atleast $1");
+      return;
+    }
+
     setIsPosting(true);
 
     try {
@@ -148,6 +155,7 @@ const PostJob = ({ isOpen, onClose, onJobAdded }) => {
               </label>
               <input
                 type="number"
+                min="1"
                 className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-white text-sm outline-none focus:border-blue-500/50 transition-all shadow-inner duration-300"
                 placeholder="500"
                 value={formData.price}
