@@ -22,6 +22,7 @@ import PublicRoute from './components/PublicRoute.jsx'
 import ProfileSetup from './components/ProfileSetup.jsx'
 import GigApplications from './components/GigApplications.jsx'
 import ManageGigs from './components/ManageGigs.jsx'
+import ManageJobCard from './components/ManageJobCard.jsx'
 
 export default function AppRoutes() {
     const { user, loading } = useAuth();
@@ -50,6 +51,7 @@ export default function AppRoutes() {
                     <Route path="manage-gigs" element={<ManageGigs />} />
                     <Route path="GigApplications/:jobId" element={<GigApplications />} />
                     <Route path="my-gigs" element={<MyGigs />} />
+                    <Route path="manage-jobs" element={<ManageJobCard />} />
 
                     <Route path="client-home" element={<ClientHome />} />
                     <Route path="student-home" element={<StudentHome jobs={[]} />} />
