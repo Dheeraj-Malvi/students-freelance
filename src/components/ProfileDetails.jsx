@@ -18,7 +18,7 @@ const ProfileDetails = () => {
     const [username, setUsername] = useState('');
     const [skills, setSkills] = useState('');
     const [bio, setBio] = useState('');
-    const [role, setRole] = useState('student'); // Default from the table
+    const [role, setRole] = useState('student');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [avatarFile, setAvatarFile] = useState(null);
@@ -378,7 +378,7 @@ const ProfileDetails = () => {
                                 <span className="relative z-10">Edit Profile</span>
                             </button>
                         ) : (
-                            <div className="flex gap-3 mt-4 w-full">
+                            <div className="flex flex-col-reverse sm:flex-row gap-3 w-full">
                                 {isExistingUser && (
                                     <button
                                         type="button"
@@ -396,7 +396,6 @@ const ProfileDetails = () => {
                                     disabled={loading}
                                     className="flex-[2] relative group/btn overflow-hidden font-black py-4 rounded-xl transition-all duration-300 active:scale-95 uppercase tracking-widest text-xs bg-emerald-600/20 backdrop-blur-md border border-emerald-500/30 border-t-emerald-400/50 text-emerald-400 hover:text-white shadow-[0_0_20px_rgba(16,185,129,0.1)] hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] hover:bg-emerald-600/40 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                 >
-                                    {/* ✨ Liquid Shimmer: Sirf tabhi slide karega jab target is button par aayega */}
                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 ease-out pointer-events-none" />
 
                                     <span className="relative z-10">
