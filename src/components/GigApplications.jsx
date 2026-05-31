@@ -10,6 +10,9 @@ const GigApplications = () => {
     const [applicants, setApplicants] = useState([]);
     const [loading, setLoading] = useState(true);
     const [jobTitle, setJobTitle] = useState("");
+    
+    // ✨ Dynamic feedback message state
+    const [message, setMessage] = useState({ text: '', type: '' });
 
     const fetchApplicants = useCallback(async () => {
         if (!jobId) {
@@ -82,60 +85,88 @@ const GigApplications = () => {
     }, [fetchApplicants]);
 
     // Glassy Approve Handler
-    const handleStatusUpdate = async (applicationId, newStatus) => {console.log(`📡 BACKEND SYNC SHURU: Application ID: ${applicationId} ko '${newStatus}' karne ka prayas...`);
-    
-    try {
-        // 1. Supabase ke 'applications' table mein row update hit karo
-        const { data, error } = await supabase
-            .from('applications')
-            .update({ status: newStatus }) // 'approved' ya 'rejected' 
-            .eq('id', applicationId)
-            .select(); // Data return karao sync validation ke liye
-
-        // Agar RLS block karega toh custom check lagate hain
-        if (error) {
-            console.error("❌ SUPABASE DB UPDATE ERROR:", error.message);
-            throw error;
-        }
-
-        // Supabase bina error ke bhi agar empty row return kare due to RLS, check it:
-        if (!data || data.length === 0) {
-            console.warn("⚠️ WARNING: DB me row update nahi hui! Shyad aap is Gig ke asli owner nahi hain.");
-            alert("🚨 Permission Denied: Bhai, aap is gig ke creator nahi ho, isliye status change nahi kar sakte!");
-            return;
-        }
-
-        console.log("🔥 DATABASE SUCCESS RESPONSE:", data);
-
-        // 2. Local State sync karo taaki screen turant update ho jaye
-        setApplicants(prev =>
-            prev.map(app =>
-                app.id === applicationId ? { ...app, status: newStatus } : app
-            )
-        );
+    const handleStatusUpdate = async (applicationId, newStatus) => {
+        console.log(`BACKEND SYNC SHURU: Application ID: ${applicationId} ko '${newStatus}' karne ka prayas...`);
         
-        console.log(`✅ UI STATE SYNCED: Application ${applicationId} successfully updated to ${newStatus}`);
+        // Find applicant name for personalized feedback message
+        const applicantName = applicants.find(app => app.id === applicationId)?.profiles?.full_name || "Developer";
 
-    } catch (err) {
-        console.error("🚨 DATABASE SE SYNC FAIL HO GAYA:", err.message);
-        alert(`Backend error occurred: ${err.message}. Ek baar Supabase ki RLS settings check karein!`);
-    }
-};
+        try {
+            setMessage({ text: '', type: '' }); // Reset previous message
+
+            // 1. Supabase ke 'applications' table mein row update hit karo
+            const { data, error } = await supabase
+                .from('applications')
+                .update({ status: newStatus }) // 'approved' ya 'rejected' 
+                .eq('id', applicationId)
+                .select(); // Data return karao sync validation ke liye
+
+            if (error) {
+                console.error("❌ SUPABASE DB UPDATE ERROR:", error.message);
+                throw error;
+            }
+
+            if (!data || data.length === 0) {
+                console.warn("⚠️ WARNING: DB me row update nahi hui! Shyad aap is Gig ke asli owner nahi hain.");
+                setMessage({ text: "🚨 Permission Denied: You are not the creator of this gig!", type: 'error' });
+                return;
+            }
+
+            console.log("🔥 DATABASE SUCCESS RESPONSE:", data);
+
+            // 2. Local State sync karo taaki screen turant update ho jaye
+            setApplicants(prev =>
+                prev.map(app =>
+                    app.id === applicationId ? { ...app, status: newStatus } : app
+                )
+            );
+            
+            // ✨ Show dynamic Success message based on the action taken
+            if (newStatus === 'approved') {
+                setMessage({ text: `🎉 Deal locked successfully with ${applicantName.toUpperCase()}!`, type: 'success' });
+            } else {
+                setMessage({ text: `✕ Application from ${applicantName.toUpperCase()} has been archived.`, type: 'info' });
+            }
+
+            // Auto hide notification banner after 3 seconds
+            // setTimeout(() => setMessage({ text: '', type: '' }), 3000);
+
+            console.log(`✅ UI STATE SYNCED: Application ${applicationId} successfully updated to ${newStatus}`);
+
+        } catch (err) {
+            console.error("🚨 DATABASE SE SYNC FAIL HO GAYA:", err.message);
+            setMessage({ text: `Backend error: ${err.message}. Check RLS configurations!`, type: 'error' });
+        }
+    };
 
     return (
         <div className="min-h-screen bg-slate-950 text-white -mt-2 selection:bg-blue-500/30">
 
             {/* Header */}
             <div className="mb-4">
-                {/* <span className="text-[10px] bg-blue-500/10 text-blue-400 font-bold px-2 py-1 rounded uppercase border border-blue-500/20 tracking-wider">Applicants Portal</span> */}
                 <h2 className="text-2xl font-black mt-2 uppercase italic tracking-tight">Applications for Gig: <span className="text-blue-500">{jobTitle || "Loading..."}</span></h2>
             </div>
+
+            {/* ✨ Centered Dynamic Message Container */}
+            {message.text && (
+                <div className="w-full flex justify-center mb-6 animate-fadeIn">
+                    <div className={`p-4 rounded-xl border text-xs font-black tracking-wider text-center min-w-[300px] max-w-md transition-all ${
+                        message.type === 'error'
+                            ? 'bg-red-500/10 border-red-500/20 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.05)]'
+                            : message.type === 'info'
+                            ? 'bg-amber-500/10 border-amber-500/20 text-amber-200 shadow-[0_0_15px_rgba(245,158,11,0.05)]'
+                            : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.05)]'
+                    }`}>
+                        {message.text}
+                    </div>
+                </div>
+            )}
 
             {loading ? (
                 <div className="flex justify-center items-center h-48"><Loader className="animate-spin text-blue-500" size={32} /></div>
             ) : applicants.length === 0 ? (
                 <div className="p-8 rounded-2xl bg-slate-900/20 border border-white/5 text-center backdrop-blur-md">
-                    <p className="text-slate-500 text-sm">Bhai, abhi tak kisi student ne is gig ke liye apply nahi kiya hai.</p>
+                    <p className="text-slate-500 text-sm">No applications yet.</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -145,8 +176,8 @@ const GigApplications = () => {
                             {/* Glassy Glow Effect */}
                             <div className="absolute -right-10 -top-10 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all duration-500" />
 
+                            {/* Card Content Top Block */}
                             <div>
-                                {/* Top Profile Layout */}
                                 <div className="flex justify-between items-start mb-5">
                                     <div className="flex items-center gap-3">
                                         {app.profiles?.avatar_url ? (
@@ -162,20 +193,17 @@ const GigApplications = () => {
                                         </div>
                                     </div>
 
-                                    {/* 🎯 Dynamic Status Chip/Badge (Color & Text Update) */}
                                     <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-full border tracking-wider transition-all duration-300 ${app.status === 'approved' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
                                         app.status === 'rejected' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
                                             'bg-amber-500/10 text-amber-400 border-amber-500/20' // Pending
                                         }`}>{app.status || 'pending'}</span>
                                 </div>
 
-                                {/* Email display */}
                                 <div className="flex items-center gap-2 text-xs text-slate-400 bg-white/[0.02] border border-white/5 p-2.5 rounded-xl mb-4 shadow-inner">
                                     <Mail size={14} className="text-slate-500" />
                                     <span className="truncate">{app.profiles?.email}</span>
                                 </div>
 
-                                {/* Tech Skills */}
                                 <div className="mb-6">
                                     <div className="flex items-center gap-1 text-[10px] uppercase font-bold text-slate-500 mb-2 tracking-wider">
                                         <Code size={12} /> Tech Skills
@@ -192,9 +220,9 @@ const GigApplications = () => {
                                 </div>
                             </div>
 
-                            {/* 🛠️ Glassy Action Buttons Conditional Flow */}
+                            {/* Action Buttons Container */}
                             {app.status === 'pending' || !app.status ? (
-                                <div className="flex gap-3 mt-4 pt-4 border-t border-white/5 animate-fadeIn">
+                                <div className="flex gap-3 mt-4 pt-4 border-t border-white/5">
                                     {/* APPROVE BUTTON */}
                                     <button
                                         onClick={() => handleStatusUpdate(app.id, 'approved')}
@@ -213,8 +241,7 @@ const GigApplications = () => {
                                     </button>
                                 </div>
                             ) : (
-                                /* Action Le liye jaane ke baad static premium layout border */
-                                <div className="mt-4 pt-4 border-t border-white/5 text-center animate-pulse">
+                                <div className="mt-4 pt-4 border-t border-white/5 text-center">
                                     <div className={`py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border ${app.status === 'approved'
                                         ? 'bg-emerald-500/[0.02] border-emerald-500/10 text-emerald-500/50'
                                         : 'bg-red-500/[0.02] border-red-500/10 text-red-500/50'

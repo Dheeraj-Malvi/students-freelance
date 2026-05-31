@@ -1,7 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate, useOutletContext } from 'react-router-dom';
-import { Briefcase, Users, ChevronRight, Plus } from 'lucide-react';
+import { Briefcase, Users, ChevronRight, Plus, Clock} from 'lucide-react';
+
+const formatTimeAgo = (dateString) => {
+    if (!dateString) return "Just now";
+
+    const now = new Date();
+    const postedDate = new Date(dateString);
+    const diffInSeconds = Math.floor((now - postedDate) / 1000);
+
+    if (diffInSeconds < 60) return "Just now";
+
+    const minutes = Math.floor(diffInSeconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+};
 
 const MyGigs = () => {
     const { user } = useOutletContext();
@@ -61,8 +80,13 @@ const MyGigs = () => {
                                     </div>
                                 </div>
                                 <h3 className="text-white text-xl font-black uppercase tracking-tight mb-1 mt-4">{gig.title}</h3>
-                                <p className="text-emerald-400 font-bold text-sm mb-6">${gig.price}</p>
-                                
+                                <p className="text-emerald-400 font-bold text-sm mb-3">${gig.price}</p>
+                                <div className="flex items-center gap-2.5 mt-1 text-[9px] text-slate-500 font-semibold">
+                                    <div className="flex items-center gap-1 text-xs text-slate-400/80">
+                                        <Clock size={11} className="text-slate-500" />
+                                        <span>{formatTimeAgo(gig.created_at)}</span>
+                                    </div>
+                                </div>
                                 <div className="flex items-center justify-between pt-6 border-t border-white/5">
                                     <div className="flex items-center gap-2 text-slate-400">
                                         <Users size={16} />
@@ -70,7 +94,7 @@ const MyGigs = () => {
                                             {gig.applications?.length || 0} Applicants
                                         </span>
                                     </div>
-                                    <button 
+                                    <button
                                         onClick={() => navigate(`/GigApplications/${gig.id}`)}
                                         className="flex items-center gap-2 text-blue-500 text-[10px] font-black uppercase tracking-widest hover:text-white transition-colors"
                                     >

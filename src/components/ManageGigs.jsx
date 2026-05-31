@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { useOutletContext, useNavigate } from 'react-router-dom';
-import JobCard from './JobCard'; // Tumhara purana component automatic style load karega
+import { useOutletContext } from 'react-router-dom';
+import JobCard from './JobCard';
 import { Loader2 } from 'lucide-react';
+import ManageJobCard from './ManageJobCard';
 
 function ManageGigs() {
     const { user } = useOutletContext();
-    const navigate = useNavigate();
     
     const [myJobs, setMyJobs] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const [message, setMessage] = useState({ text: '', type: '' });
 
-    // 1. Fetch only this Client's posted jobs from 'jobs' table
     useEffect(() => {
         const fetchMyJobs = async () => {
             if (!user?.id) return;
@@ -37,7 +36,7 @@ function ManageGigs() {
         fetchMyJobs();
     }, [user]);
 
-    // 2. Simple Delete Handler
+    // Simple Delete Handler
     const handleDeletePost = async (jobId) => {
         const confirmDelete = window.confirm("Are you sure you want to delete this listing permanently?");
         if (!confirmDelete) return;
@@ -53,7 +52,6 @@ function ManageGigs() {
 
             if (error) throw error;
 
-            // Instantly remove from screen state
             setMyJobs((prev) => prev.filter((job) => job.id !== jobId));
             
             setMessage({ text: 'Gig deleted successfully!', type: 'success' });
@@ -83,10 +81,9 @@ function ManageGigs() {
         <>
             {/* --- TOP HEADER SECTION (Clean & Minimal) --- */}
             <div className="min-h-screen bg-slate-950">
-                <div className="max-w-6xl mx-auto"> {/* Left-align setup match karne ke liye pad-top yahan dala */}
+                <div className="max-w-6xl mx-auto"> 
 
-                    {/* --- DYNAMIC HEADER MATCHED WITH REVIEW APPLICATIONS LAYOUT --- */}
-                    <div className="flex justify-between italic border-b border-white/10 pb-4 items-end mb-8 px-6">
+                    <div className="flex justify-between italic border-b border-white/10 pb-4 items-end mb-8">
                         <div>
                             <h2 className="text-2xl sm:text-2xl md:text-2xl font-black mb-2 tracking-tighter uppercase text-white">
                                 Manage <span className="text-blue-500">Listings</span>
@@ -97,7 +94,6 @@ function ManageGigs() {
                         </div>
                     </div>
 
-                    {/* ✨ Left-aligned Dynamic Message Container (Sits cleanly right above the grid) */}
                     {message.text && (
                         <div className="w-full flex-center px-6 mb-6">
                             <div className={`p-4 rounded-xl border text-xs font-bold transition-all text-center min-w-full max-w-md ${
@@ -110,36 +106,23 @@ function ManageGigs() {
                         </div>
                     )}  
 
-                    {/* --- JOBS GRID (Exact Copy of Home.jsx Structure) --- */}
+                    {/* --- JOBS GRID --- */}
                     <main className="max-w-7xl mx-auto px-6 pb-24">
                         {myJobs.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative z-20">
                                 {myJobs.map((job) => (
                                     <div
                                         key={job.id}
-                                        className="relative group cursor-pointer"
-                                        onClick={() => navigate(`/manage-gigs/${job.id}`)}
+                                        className="relative group transition-all duration-500 hover:scale-[1.02]"
                                     >
-                                        {/* Reusing the same identical JobCard */}
-                                        <JobCard
+                                        <ManageJobCard
                                             title={job.title}
                                             category={job.category}
                                             price={job.price}
                                             created_at={job.created_at}
+                                            onDelete={() => handleDeletePost(job.id)}
                                         />
 
-                                        {/* Always visible/Hover delete button just like Home */}
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleDeletePost(job.id);
-                                            }}
-                                            className="absolute top-4 right-4 bg-red-500/10 backdrop-blur-md text-red-500 hover:bg-red-500 hover:text-white p-2.5 rounded-xl transition-all opacity-100 lg:opacity-0 group-hover:opacity-100 shadow-xl z-30 border border-red-500/20"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1-1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                                            </svg>
-                                        </button>
                                     </div>
                                 ))}
                             </div>
