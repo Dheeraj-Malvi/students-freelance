@@ -98,9 +98,9 @@ const Dashboard = () => {
 
     return (
         <>
-            <div className="mb-6">
-                <h2 className="text-xl md:text-2xl mb-1 font-bold text-white uppercase tracking-tight">
-                    <i>Welcome Back, <span className="text-blue-500">{user?.user_metadata?.full_name?.split(' ')[0]}</span> </i>👋
+            <div className="mb-6 px-1">
+                <h2 className="text-lg md:text-2xl mb-1 font-bold text-white tracking-tight">
+                    <i>Welcome Back, <span className="text-blue-500">{user?.user_metadata?.full_name?.split(' ')[0]?.toUpperCase()}</span> </i>👋
                 </h2>
                 <span className="text-sm text-slate-500 mb-4 tracking-widest">
                     💡<i className="text-blue-300"> {userRole === 'student' ? "Turn your skills into pocket money." : "Hire top-tier student talent at half the cost"}</i>
@@ -118,44 +118,43 @@ const Dashboard = () => {
                     {userRole === 'client' ? "Manage Your Gigs" : "Marketplace"}
                 </h3>
 
-                {/* 🔍 PREMIUM TRANSITION SEARCH INPUT BLOCK */}
                 <div className="flex items-center gap-4 w-full sm:w-auto justify-end">
                     <div
-                        className={`relative flex items-center transition-all duration-500 ease-out h-11 rounded-2xl border backdrop-blur-md shadow-inner group ${isFocused
-                                ? 'w-72 bg-white/10 border-blue-500/40 shadow-[0_0_25px_rgba(59,130,246,0.15)]'
-                                : 'w-52 bg-white/5 border-white/10 hover:border-white/20'
-                            }`}
-                    >
-                        <div className="absolute left-4 pointer-events-none flex items-center justify-center">
-                            <Search
-                                size={14}
-                                className={`transition-all duration-300 ${isFocused ? 'text-blue-400 scale-110' : 'text-slate-500 group-hover:text-slate-400'
-                                    }`}
-                            />
-                        </div>
+    className={`relative flex items-center transition-all duration-500 ease-out h-11 rounded-2xl border backdrop-blur-md shadow-inner group w-full 
+        ${isFocused
+            ? 'md:w-72 bg-white/10 border-blue-500/40 shadow-[0_0_25px_rgba(59,130,246,0.15)]'
+            : 'md:w-52 bg-white/5 border-white/10 hover:border-white/20'
+        }`}
+>
+    <div className="absolute left-4 pointer-events-none flex items-center justify-center">
+        <Search
+            size={14}
+            className={`transition-all duration-300 ${isFocused ? 'text-blue-400 scale-110' : 'text-slate-500 group-hover:text-slate-400'}`}
+        />
+    </div>
 
-                        <input
-                            type="text"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            onFocus={() => setIsFocused(true)}
-                            onBlur={() => setIsFocused(false)}
-                            placeholder="Search gigs..."
-                            className="w-full h-full bg-transparent pl-10 pr-8 text-xs font-medium text-white placeholder-slate-500 outline-none transition-all duration-300"
-                        />
+    <input
+        type="text"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
+        placeholder="Search gigs..."
+        className="w-full h-full bg-transparent pl-10 pr-8 text-xs font-medium text-white placeholder-slate-500 outline-none transition-all duration-300"
+    />
 
-                        {searchTerm && (
-                            <button
-                                type="button"
-                                onClick={() => setSearchTerm('')}
-                                className="absolute right-3 p-1 rounded-lg bg-white/0 hover:bg-white/10 text-slate-500 hover:text-white transition-all duration-300"
-                            >
-                                <X size={12} />
-                            </button>
-                        )}
+    {searchTerm && (
+        <button
+            type="button"
+            onClick={() => setSearchTerm('')}
+            className="absolute right-3 p-1 rounded-lg bg-white/0 hover:bg-white/10 text-slate-500 hover:text-white transition-all duration-300"
+        >
+            <X size={12} />
+        </button>
+    )}
 
-                        <div className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-[2px] bg-gradient-to-r from-transparent via-blue-500 to-transparent transition-all duration-500 ${isFocused ? 'w-2/3 opacity-100' : 'w-0 opacity-0'}`} />
-                    </div>
+    <div className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-[2px] bg-gradient-to-r from-transparent via-blue-500 to-transparent transition-all duration-500 ${isFocused ? 'w-2/3 opacity-100' : 'w-0 opacity-0'}`} />
+</div>
 
                     {userRole === 'client' && (
                         <button
@@ -205,42 +204,57 @@ const Dashboard = () => {
 };
 
 const GigCard = ({ item, userRole, isAlreadyApplied, onApply, navigate }) => (
-    <div className="p-5 bg-slate-900/50 border border-white/5 rounded-2xl flex justify-between items-center hover:border-blue-500/30 transition-all duration-300 backdrop-blur-md">
-        <div>
-            <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 text-[8px] font-bold rounded uppercase border border-blue-500/20">{item.category}</span>
-            <p className="text-white font-bold text-sm uppercase mt-1">{item.title}</p>
-            {/* <p className="text-[9px] text-slate-500 mt-1">${item.price} • Active</p> */}
-            <div className="flex items-center gap-2.5 mt-1 text-[9px] text-slate-500 font-semibold">
-                <span>${item.price} • Active</span>
-                <span className="text-slate-600">•</span>
+    <div className="group relative p-5 bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-blue-500/30 transition-all duration-300">
+        
+        <div className="absolute -inset-[1px] bg-gradient-to-r from-blue-500/10 via-transparent to-emerald-500/5 rounded-2xl opacity-0 group-hover:opacity-100 blur-[1px] transition-opacity duration-500 pointer-events-none" />
+
+        <div className="relative z-10 w-full md:w-auto">
+            <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 text-[8px] font-bold rounded uppercase border border-blue-500/20 shadow-sm">
+                {item.category}
+            </span>
+            
+            <p className="text-white font-bold text-sm uppercase mt-1.5 group-hover:text-blue-400 transition-colors duration-300 leading-snug">
+                {item.title}
+            </p>
+            
+            <div className="flex flex-wrap items-center gap-2 mt-1.5 text-[9px] text-slate-500 font-semibold tracking-wide">
+                <span className="text-emerald-400 bg-emerald-500/5 px-1.5 py-0.5 rounded border border-emerald-500/10">
+                    ${item.price} • Active
+                </span>
+                <span className="text-slate-700">•</span>
                 <div className="flex items-center gap-1 text-slate-400/80">
-                    <Clock size={11} className="text-slate-500" />
+                    <Clock size={11} className="text-slate-500 group-hover:text-blue-400 transition-colors" />
                     <span>{formatTimeAgo(item.created_at)}</span>
                 </div>
             </div>
         </div>
-        <button
-            disabled={isAlreadyApplied}
-            onClick={() => userRole === 'student' ? onApply(item.id) : navigate(`/GigApplications/${item.id}`)}
-            className={`relative group overflow-hidden text-[10px] px-5 py-2.5 rounded-xl font-black uppercase flex items-center gap-2 transition-all duration-300 border 
-    ${isAlreadyApplied
-                    ? 'bg-slate-800 text-slate-500 border-white/5 cursor-not-allowed'
-                    : 'bg-blue-600/10 hover:bg-white/10 text-white border-white/10 hover:border-blue-500/50 hover:text-blue-200 shadow-[0_0_20px_rgba(37,99,235,0.1)] hover:shadow-[0_0_30px_rgba(37,99,235,0.3)]'
-                }`}
-        >
-            {!isAlreadyApplied && (
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out pointer-events-none"></div>
-            )}
 
-            <span className="relative z-10 flex items-center gap-2 w-full justify-center">
-                {userRole === 'student' ? (isAlreadyApplied ? "Applied" : "Apply Now") : "View Applicants"}
-                {isAlreadyApplied ? (
-                    <Check size={14} className="animate-in zoom-in duration-300" />
-                ) : (
-                    <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform duration-300" />
+        {/* Button Section: provided bottom border line and full screen width for mobile */}
+        <div className="relative z-10 w-full md:w-auto pt-3 md:pt-0 border-t border-white/5 md:border-none shrink-0">
+            <button
+                disabled={isAlreadyApplied}
+                onClick={() => userRole === 'student' ? onApply(item.id) : navigate(`/GigApplications/${item.id}`)}
+                className={`relative group/btn overflow-hidden text-[10px] w-full md:w-auto px-5 py-2.5 rounded-xl font-black uppercase flex items-center justify-center gap-2 transition-all duration-300 border tracking-widest
+                    ${isAlreadyApplied
+                        ? 'bg-slate-800 text-slate-500 border-white/5 cursor-not-allowed'
+                        : 'bg-blue-600/10 hover:bg-white/10 text-white border-white/10 hover:border-blue-500/50 hover:text-blue-200 shadow-[0_0_20px_rgba(37,99,235,0.1)] hover:shadow-[0_0_30px_rgba(37,99,235,0.3)]'
+                    }`}
+            >
+                {!isAlreadyApplied && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 ease-out pointer-events-none"></div>
                 )}
-            </span>
-        </button>
+
+                <span className="relative z-10 flex items-center gap-2 w-full justify-center">
+                    {userRole === 'student' ? (isAlreadyApplied ? "Applied" : "Apply Now") : "View Applicants"}
+                    {isAlreadyApplied ? (
+                        <Check size={14} className="animate-in zoom-in duration-300 text-emerald-400" />
+                    ) : (
+                        <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform duration-300" />
+                    )}
+                </span>
+            </button>
+        </div>
+
     </div>
 );
 

@@ -9,8 +9,8 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(''); // Alert ki jagah ye use karenge
-  const [showPassword, setShowPassword] = useState(false); // Eye toggle state
+  const [errorMessage, setErrorMessage] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -18,14 +18,12 @@ const Login = () => {
     setLoading(true);
     setErrorMessage('');
 
-    // 1. SIGN IN
     const { data, error } = await supabase.auth.signInWithPassword({
       email: email,
       password: password
     });
 
     if (error) {
-      // User friendly error handling
       setErrorMessage(
         error.message === "Invalid login credentials"
           ? "Email or Password is incorrect."
@@ -36,7 +34,6 @@ const Login = () => {
 
     }
 
-    // 2. SUCCESS! (Important: Yahan 'data.user' use karenge)
     if (data?.user) {
       try {
         const { data: profile, error: profileError } = await supabase
@@ -47,18 +44,16 @@ const Login = () => {
 
         if (profileError) throw profileError;
 
-        // 3. REDIRECT LOGIC
         if (profile) {
           console.log("Profile found, going home");
           navigate('/dashboard', { replace: true });
         }
-         else {
+        else {
           console.log("No profile found, going to setup");
           navigate('/profiledetails', { replace: true });
         }
       } catch (err) {
         console.error("Profile check failed:", err);
-        // Fallback: Agar error aaye toh safety ke liye setup par bhejo
         navigate('/profiledetails');
       }
     };
@@ -66,7 +61,6 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4 relative overflow-hidden">
-      {/* Back Button - Clean design */}
       <Link
         to="/"
         className="absolute top-8 left-8 group overflow-hidden px-5 py-2.5 rounded-full transition-all duration-300 active:scale-95 z-20
@@ -80,10 +74,8 @@ const Login = () => {
     hover:shadow-[0_0_20px_rgba(255,255,255,0.05)]
     hover:bg-white/10"
       >
-        {/* Subtle Shimmer for the Back Button */}
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
 
-        {/* Arrow Icon with a little nudge animation */}
         <span className="relative z-10 flex items-center gap-2">
           <ArrowLeft className="w-3.5 h-3.5 transition-transform duration-300 group-hover:-translate-x-1" />
           Back to Home
@@ -93,20 +85,12 @@ const Login = () => {
       {/* --- 2. SIGN UP CARD WRAPPER --- */}
       <div className="relative group w-full max-w-md">
 
-        {/* Outer Glow Effect (Chamakti hui border) */}
         <div className="absolute -inset-1 bg-gradient-to-r from-emerald-600 to-blue-600 rounded-[2rem] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
 
         {/* Main Card Content */}
         <div className="relative bg-slate-900/90 backdrop-blur-2xl border border-white/10 p-8 rounded-[2rem] shadow-2xl">
           <h2 className="text-3xl font-bold text-white text-center mb-2">Welcome Back</h2>
           <p className="text-slate-500 text-center mb-8">Login to your Student Gig account</p>
-
-          {/* <div className="max-w-md w-full bg-slate-900 border border-slate-800 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden"> */}
-          {/* Subtle Liquid Glow */}
-          {/* <div className="absolute -top-24 -left-24 w-48 h-48 bg-blue-500/10 blur-[80px]"></div>
-
-        <h2 className="text-3xl font-black text-white text-center mb-2 tracking-tight">Welcome Back</h2>
-        <p className="text-slate-500 text-center mb-8 font-medium italic">Login to your Student Gig account</p> */}
 
           {/* ERROR MESSAGE (No more annoying alerts) */}
           {errorMessage && (
@@ -140,7 +124,6 @@ const Login = () => {
                   required
                 />
 
-                {/* SMOOTH EYE BUTTON */}
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -165,7 +148,6 @@ const Login = () => {
     hover:shadow-[0_0_30px_rgba(37,99,235,0.3)]
     hover:bg-blue-600/40"
             >
-              {/* ✨ Shine sirf tab chalega jab MOUSE BUTTON PAR AAYEGA (`group-hover/btn`) */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 ease-out pointer-events-none" />
 
               <span className="relative z-10">
