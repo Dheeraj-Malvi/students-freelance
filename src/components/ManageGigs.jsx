@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useOutletContext } from 'react-router-dom';
-import JobCard from './JobCard'; // Tumhara purana component automatic style load karega
+import JobCard from './JobCard';
 import { Loader2 } from 'lucide-react';
 import ManageJobCard from './ManageJobCard';
 
@@ -13,7 +13,6 @@ function ManageGigs() {
 
     const [message, setMessage] = useState({ text: '', type: '' });
 
-    // 1. Fetch only this Client's posted jobs from 'jobs' table
     useEffect(() => {
         const fetchMyJobs = async () => {
             if (!user?.id) return;
@@ -37,7 +36,7 @@ function ManageGigs() {
         fetchMyJobs();
     }, [user]);
 
-    // 2. Simple Delete Handler
+    // Simple Delete Handler
     const handleDeletePost = async (jobId) => {
         const confirmDelete = window.confirm("Are you sure you want to delete this listing permanently?");
         if (!confirmDelete) return;
@@ -53,7 +52,6 @@ function ManageGigs() {
 
             if (error) throw error;
 
-            // Instantly remove from screen state
             setMyJobs((prev) => prev.filter((job) => job.id !== jobId));
             
             setMessage({ text: 'Gig deleted successfully!', type: 'success' });
@@ -83,10 +81,9 @@ function ManageGigs() {
         <>
             {/* --- TOP HEADER SECTION (Clean & Minimal) --- */}
             <div className="min-h-screen bg-slate-950">
-                <div className="max-w-6xl mx-auto"> {/* Left-align setup match karne ke liye pad-top yahan dala */}
+                <div className="max-w-6xl mx-auto"> 
 
-                    {/* --- DYNAMIC HEADER MATCHED WITH REVIEW APPLICATIONS LAYOUT --- */}
-                    <div className="flex justify-between italic border-b border-white/10 pb-4 items-end mb-8 px-6">
+                    <div className="flex justify-between italic border-b border-white/10 pb-4 items-end mb-8">
                         <div>
                             <h2 className="text-2xl sm:text-2xl md:text-2xl font-black mb-2 tracking-tighter uppercase text-white">
                                 Manage <span className="text-blue-500">Listings</span>
@@ -97,7 +94,6 @@ function ManageGigs() {
                         </div>
                     </div>
 
-                    {/* ✨ Left-aligned Dynamic Message Container (Sits cleanly right above the grid) */}
                     {message.text && (
                         <div className="w-full flex-center px-6 mb-6">
                             <div className={`p-4 rounded-xl border text-xs font-bold transition-all text-center min-w-full max-w-md ${
@@ -110,7 +106,7 @@ function ManageGigs() {
                         </div>
                     )}  
 
-                    {/* --- JOBS GRID (Exact Copy of Home.jsx Structure) --- */}
+                    {/* --- JOBS GRID --- */}
                     <main className="max-w-7xl mx-auto px-6 pb-24">
                         {myJobs.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative z-20">
@@ -119,7 +115,6 @@ function ManageGigs() {
                                         key={job.id}
                                         className="relative group transition-all duration-500 hover:scale-[1.02]"
                                     >
-                                        {/* Reusing the same identical JobCard */}
                                         <ManageJobCard
                                             title={job.title}
                                             category={job.category}
