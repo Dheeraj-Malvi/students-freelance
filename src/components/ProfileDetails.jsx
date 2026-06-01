@@ -222,7 +222,7 @@ const ProfileDetails = () => {
             const { error: upsertError } = await supabase.from('profiles').upsert(updates);
             if (upsertError) throw upsertError;
 
-            // 3. Auth Metadata update (Dashboard pe naam dikhane ke liye)
+            // 3. Auth Metadata update (To show name on dashboard)
             await supabase.auth.updateUser({
                 data: {
                     full_name: fullName,
@@ -289,7 +289,6 @@ const ProfileDetails = () => {
                     )}
 
                     <form onSubmit={handleProfileUpdate} className="space-y-4 text-left">
-                        {/* ROLE - Hamesha disabled agar setup ho chuka hai */}
                         <div className="space-y-1.5">
                             <label className="text-slate-400 text-[10px] font-black uppercase tracking-widest ml-1">Account Role</label>
                             <div className="grid grid-cols-2 gap-3">
@@ -297,7 +296,7 @@ const ProfileDetails = () => {
                                     <button
                                         key={r}
                                         type="button"
-                                        disabled={true} // Locked as per your condition
+                                        disabled={true}
                                         className={`py-2.5 rounded-xl border capitalize font-bold text-[11px] tracking-widest transition-all ${role === r ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400' : 'bg-slate-950/50 border-white/5 text-slate-600 cursor-not-allowed opacity-50'}`}
                                     >
                                         {r}
@@ -312,13 +311,12 @@ const ProfileDetails = () => {
                                 <AtSign className="absolute left-4 w-4 h-4 text-slate-500" />
                                 <input
                                     type="text"
-                                    disabled={true} // Locked as per your condition
+                                    disabled={true}
                                     className="w-full bg-slate-950/30 border border-white/5 rounded-xl py-3 pl-11 pr-4 text-slate-500 text-sm cursor-not-allowed"
                                     value={username}
                                 />
                             </div>
                         </div>
-                        {/* EDITABLE FIELDS - Depend on isEditing */}
                         <div className="space-y-1.5">
                             <label className="text-slate-400 text-[10px] font-black uppercase tracking-widest ml-1">Full Name</label>
                             <div className="relative flex items-center">
@@ -373,7 +371,6 @@ const ProfileDetails = () => {
                                 onClick={() => setIsEditing(true)}
                                 className="w-full relative overflow-hidden bg-blue-600/20 hover:bg-blue-600/30 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all duration-300 border border-white/10 hover:border-blue-500/50 hover:text-blue-200 hover:shadow-[0_0_30px_rgba(37,99,235,0.2)]"
                             >
-                                {/* FIX: 'group-hover:' ko 'hover:' kiya taaki sirf button hover par chamke */}
                                 <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full transition-transform duration-1000 ease-out [button:hover_&]:translate-x-full"></span>
                                 <span className="relative z-10">Edit Profile</span>
                             </button>

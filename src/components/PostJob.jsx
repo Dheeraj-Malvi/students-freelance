@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { X, Briefcase } from 'lucide-react';
 
@@ -8,11 +8,18 @@ const PostJob = ({ isOpen, onClose, onJobAdded }) => {
   const [animate, setAnimate] = useState(false); // Controls transition trigger
   const [shouldRender, setShouldRender] = useState(isOpen); // Controls actual DOM mounting
 
+  const jobtitleRef = useRef(null);
+  
   // 🎭 Handle mounting and unmounting smoothly
   useEffect(() => {
     if (isOpen) {
       setShouldRender(true); // Pehle DOM mein add karo
-      const timer = setTimeout(() => setAnimate(true), 10); // Phir smooth entry chalao
+      const timer = setTimeout(() => {
+        setAnimate(true);
+        if (jobtitleRef.current)
+           jobtitleRef.current.focus();
+      }, 10); // Phir smooth entry chalao
+
       return () => clearTimeout(timer);
     } else {
       setAnimate(false); // Pehle smooth exit animation chalao
@@ -124,6 +131,7 @@ const PostJob = ({ isOpen, onClose, onJobAdded }) => {
             <input
               className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-white text-sm outline-none focus:border-blue-500/50 transition-all shadow-inner duration-300"
               placeholder="e.g. Senior React Developer"
+              ref={jobtitleRef}
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               required
