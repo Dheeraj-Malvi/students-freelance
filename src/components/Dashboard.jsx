@@ -32,6 +32,29 @@ const Dashboard = () => {
     const [stats, setStats] = useState({ active: 0, completed: 0, earnings: 0 });
     const [isFocused, setIsFocused] = useState(false);
 
+    const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+    const [toastStatus, setToastStatus] = useState("idle"); // "idle" | "showing" | "vanishing"
+
+    const handleCloseToast = useCallback(() => {
+        setToastStatus("vanishing"); // 1. Pehle vanish class trigger hogi transition ke liye
+        setTimeout(() => {
+            setToast(prev => ({ ...prev, show: false })); // 2. Then state se hatayege
+            setToastStatus("idle");
+        }, 400); // Smooth animation ka complete buffer duration (400ms)
+    }, []);
+
+    const showNotification = useCallback((message, type = "success") => {
+        setToast({ show: true, message, type });
+        setToastStatus("showing");
+
+        // 4.5 Seconds tak rukega, fir smoothly transitions ke sath fade out hoga
+        const timer = setTimeout(() => {
+            handleCloseToast();
+        }, 4500);
+
+        return () => clearTimeout(timer);
+    }, [handleCloseToast]);
+
     const fetchUserSkills = useCallback(async () => {
         if (!user || userRole !== 'student') return;
         try {
@@ -78,7 +101,7 @@ const Dashboard = () => {
     const handleApply = async (jobId) => {
         const { error } = await supabase.from('applications').insert([{ job_id: jobId, applicant_id: user.id, status: 'pending' }]);
         if (!error) {
-            alert("Applied Successfully!");
+            showNotification("Applied Successfully!");
             fetchDashboardData();
         }
     };
@@ -231,19 +254,19 @@ const Dashboard = () => {
                                     ? "Add your core skills in your profile dashboard to instantly unlock personalized recommendations! 🚀"
                                     : "No active gigs found matching your current filters."}
                             </p>
-                                    {activeTab === 'for-you' && (
-                                        <button
-                                            type="button"
-                                            onClick={() => setActiveTab('explore')}
-                                            className="relative group/shiny overflow-hidden mt-4 text-[10px] font-black uppercase tracking-widest bg-white/5 backdrop-blur-md border border-white/10 hover:border-blue-500/40 text-blue-400 hover:text-white px-5 py-3 rounded-xl transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]"
-                                        >
-                                            {/* 🌟 PREMIUM GLOSSY SHINE EFFECT OVERLAY */}
-                                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/shiny:translate-x-full transition-transform duration-1000 ease-out pointer-events-none" />
+                            {activeTab === 'for-you' && (
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveTab('explore')}
+                                    className="relative group/shiny overflow-hidden mt-4 text-[10px] font-black uppercase tracking-widest bg-white/5 backdrop-blur-md border border-white/10 hover:border-blue-500/40 text-blue-400 hover:text-white px-5 py-3 rounded-xl transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]"
+                                >
+                                    {/* 🌟 PREMIUM GLOSSY SHINE EFFECT OVERLAY */}
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/shiny:translate-x-full transition-transform duration-1000 ease-out pointer-events-none" />
 
-                                            <span className="relative z-10 flex items-center justify-center gap-1.5">
-                                                Browse General Marketplace
-                                            </span>
-                                        </button>)}
+                                    <span className="relative z-10 flex items-center justify-center gap-1.5">
+                                        Browse General Marketplace
+                                    </span>
+                                </button>)}
                         </div>
                     )}
                 </div>
@@ -256,7 +279,25 @@ const Dashboard = () => {
                     onJobAdded={fetchDashboardData}
                 />
             )}
+
+            {toast.show && (
+                <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-500 ease-in-out pointer-events-none
+                    ${toastStatus === 'vanishing'
+                        ? 'opacity-0 scale-90 translate-y-4 blur-sm'
+                        : 'opacity-100 scale-100 translate-y-0'
+                    }
+                `}>
+                    <div className={`flex items-center gap-3 px-4 py-3 rounded-2xl backdrop-blur-xl border shadow-2xl transition-all duration-300 ${toast.type === 'success'
+                        ? 'bg-slate-900/80 border-emerald-500/30 text-emerald-400 shadow-emerald-500/5'
+                        : 'bg-slate-900/80 border-rose-500/30 text-rose-400 shadow-rose-500/5'
+                        }`}>
+                        {toast.type === 'success' ? <Check size={14} className="shrink-0" /> : <X size={14} className="shrink-0" />}
+                        <span className="text-[11px] font-black uppercase tracking-wider">{toast.message}</span>
+                    </div>
+                </div>
+            )}
         </>
+
     );
 };
 
