@@ -13,30 +13,41 @@ const GigApplications = () => {
     
     // ✨ Dynamic feedback message state
     const [message, setMessage] = useState({ text: '', type: '' });
+    const [isVisible, setIsVisible] = useState(false);
+
+    const showNotification = useCallback((text, type) => {
+    setMessage({ text, type });
+    setIsVisible(true);
+    const timer = setTimeout(() => {
+        setMessage({ text: '', type: '' });
+        setIsVisible(false);
+    }, 5000);
+    return () => clearTimeout(timer);
+}, []);
 
     const fetchApplicants = useCallback(async () => {
         if (!jobId) {
-            console.log("❌ DEBUG: URL se jobId hi nahi mili boss!");
+            console.log("❌ DEBUG: could not fetch jobid from URL !");
             return;
         }
 
         setLoading(true);
         try {
-            console.log("🚀 DEBUG 1: Fetching process shuru hua for Job ID:", jobId);
+            console.log("🚀 DEBUG 1: Fetching process started for Job ID:", jobId);
 
             // 1. Job Title check karo
             const { data: jobData, error: jobError } = await supabase.from('jobs').select('title').eq('id', jobId).single();
-            console.log("📊 DEBUG 2: Jobs table se ye aaya ->", { jobData, jobError });
+            console.log("📊 DEBUG 2: found from jobs table ->", { jobData, jobError });
             if (jobData) setJobTitle(jobData.title);
 
             // 2. Applications table check karo
-            console.log("📡 DEBUG 3: Applications table ko query maar rahe hain...");
+            console.log("📡 DEBUG 3: hitting query to applications table...");
             const { data: appsData, error: appsError } = await supabase
                 .from('applications')
                 .select('*')
                 .eq('job_id', jobId);
 
-            console.log("📊 DEBUG 4: Applications table ka raw data ->", appsData);
+            console.log("📊 DEBUG 4: Applications table raw data ->", appsData);
             if (appsError) {
                 console.error("🚨 DEBUG ERROR (Applications Fetch):", appsError.message);
                 throw appsError;
@@ -44,16 +55,16 @@ const GigApplications = () => {
 
             if (appsData && appsData.length > 0) {
                 const applicantIds = appsData.map(app => app.applicant_id);
-                console.log("🆔 DEBUG 5: Map kiye huye Applicant IDs:", applicantIds);
+                console.log("🆔 DEBUG 5: Mapped Applicant IDs:", applicantIds);
 
                 // 3. Profiles table check karo
-                console.log("📡 DEBUG 6: Profiles table ko query maar rahe hain...");
+                console.log("📡 DEBUG 6: hitting query to profiles table...");
                 const { data: profilesData, error: profilesError } = await supabase
                     .from('profiles')
                     .select('id, full_name, skills, email, avatar_url')
                     .in('id', applicantIds);
 
-                console.log("📊 DEBUG 7: Profiles table ka raw data ->", profilesData);
+                console.log("📊 DEBUG 7: Profiles table's raw data ->", profilesData);
                 if (profilesError) {
                     console.error("🚨 DEBUG ERROR (Profiles Fetch):", profilesError.message);
                 }
@@ -70,7 +81,7 @@ const GigApplications = () => {
                 console.log("🎯 DEBUG 8: Final Combined Data jo state me jaa raha hai ->", combinedData);
                 setApplicants(combinedData);
             } else {
-                console.log("⚠️ DEBUG: Applications array ekdum khali (empty) aaya hai DB se!");
+                console.log("⚠️ DEBUG: Applications array empty aaya hai DB se!");
                 setApplicants([]);
             }
         } catch (err) {
@@ -92,7 +103,7 @@ const GigApplications = () => {
         const applicantName = applicants.find(app => app.id === applicationId)?.profiles?.full_name || "Developer";
 
         try {
-            setMessage({ text: '', type: '' }); // Reset previous message
+            showNotification('', ''); // Reset previous message
 
             // 1. Supabase ke 'applications' table mein row update hit karo
             const { data, error } = await supabase
@@ -108,7 +119,7 @@ const GigApplications = () => {
 
             if (!data || data.length === 0) {
                 console.warn("⚠️ WARNING: DB me row update nahi hui! Shyad aap is Gig ke asli owner nahi hain.");
-                setMessage({ text: "🚨 Permission Denied: You are not the creator of this gig!", type: 'error' });
+                showNotification("🚨 Permission Denied: You are not the creator of this gig!", "error");
                 return;
             }
 
@@ -123,19 +134,19 @@ const GigApplications = () => {
             
             // ✨ Show dynamic Success message based on the action taken
             if (newStatus === 'approved') {
-                setMessage({ text: `🎉 Deal locked successfully with ${applicantName.toUpperCase()}!`, type: 'success' });
+                showNotification(`🎉 Deal locked successfully with ${applicantName.toUpperCase()}!`, "success");
             } else {
-                setMessage({ text: `✕ Application from ${applicantName.toUpperCase()} has been archived.`, type: 'info' });
+                showNotification(`✕ Application from ${applicantName.toUpperCase()} has been archived.`, "info");
             }
 
             // Auto hide notification banner after 3 seconds
-            // setTimeout(() => setMessage({ text: '', type: '' }), 3000);
+            // setTimeout(() => showNotification('', ''), 3000);
 
             console.log(`✅ UI STATE SYNCED: Application ${applicationId} successfully updated to ${newStatus}`);
 
         } catch (err) {
             console.error("🚨 DATABASE SE SYNC FAIL HO GAYA:", err.message);
-            setMessage({ text: `Backend error: ${err.message}. Check RLS configurations!`, type: 'error' });
+            showNotification(`Backend error: ${err.message}. Check RLS configurations!`, "error");
         }
     };
 
@@ -148,19 +159,19 @@ const GigApplications = () => {
             </div>
 
             {/* ✨ Centered Dynamic Message Container */}
-            {message.text && (
-                <div className="w-full flex justify-center mb-6 animate-fadeIn">
-                    <div className={`p-4 rounded-xl border text-xs font-black tracking-wider text-center min-w-[300px] max-w-md transition-all ${
-                        message.type === 'error'
-                            ? 'bg-red-500/10 border-red-500/20 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.05)]'
-                            : message.type === 'info'
-                            ? 'bg-amber-500/10 border-amber-500/20 text-amber-200 shadow-[0_0_15px_rgba(245,158,11,0.05)]'
-                            : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.05)]'
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[150] w-full max-w-md px-4 pointer-events-none">
+                <div className={`p-4 rounded-2xl border text-xs font-black tracking-wider text-center pointer-events-auto shadow-2xl backdrop-blur-xl transition-all duration-500 ease-in-out transform ${isVisible && message.text
+                        ? 'opacity-100 translate-y-0 scale-100 visible'
+                        : 'opacity-0 translate-y-4 scale-95 invisible' // 👈 Ab transition 100% force hoga
+                    } ${message.type === 'error'
+                        ? 'bg-red-500/10 border-red-500/20 text-red-400 shadow-[0_0_25px_rgba(239,68,68,0.15)]'
+                        : message.type === 'info'
+                            ? 'bg-amber-500/10 border-amber-500/20 text-amber-200 shadow-[0_0_25px_rgba(245,158,11,0.15)]'
+                            : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300 shadow-[0_0_25px_rgba(16,185,129,0.15)]'
                     }`}>
-                        {message.text}
-                    </div>
+                    {message.text}
                 </div>
-            )}
+            </div>
 
             {loading ? (
                 <div className="flex justify-center items-center h-48"><Loader className="animate-spin text-blue-500" size={32} /></div>

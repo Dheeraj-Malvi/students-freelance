@@ -277,6 +277,7 @@ const Dashboard = () => {
                     isOpen={isPostModalOpen}
                     onClose={() => setIsPostModalOpen(false)}
                     onJobAdded={fetchDashboardData}
+                    showNotification={showNotification}
                 />
             )}
 
@@ -291,7 +292,9 @@ const Dashboard = () => {
                         ? 'bg-slate-900/80 border-emerald-500/30 text-emerald-400 shadow-emerald-500/5'
                         : 'bg-slate-900/80 border-rose-500/30 text-rose-400 shadow-rose-500/5'
                         }`}>
-                        {toast.type === 'success' ? <Check size={14} className="shrink-0" /> : <X size={14} className="shrink-0" />}
+                        {toast.type === 'success' ?
+                            <Check size={14} className="shrink-0" /> :
+                            <X size={14} className="shrink-0" />}
                         <span className="text-[11px] font-black uppercase tracking-wider">{toast.message}</span>
                     </div>
                 </div>

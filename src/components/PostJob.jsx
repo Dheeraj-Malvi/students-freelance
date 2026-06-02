@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { X, Briefcase } from 'lucide-react';
 
-const PostJob = ({ isOpen, onClose, onJobAdded }) => {
+const PostJob = ({ isOpen, onClose, onJobAdded, showNotification }) => { // 👈 1. Prop receive kiya yahan
   const [formData, setFormData] = useState({ title: '', category: 'Web Dev', price: '' });
   const [isPosting, setIsPosting] = useState(false);
   const [animate, setAnimate] = useState(false); // Controls transition trigger
@@ -13,38 +13,36 @@ const PostJob = ({ isOpen, onClose, onJobAdded }) => {
   // 🎭 Handle mounting and unmounting smoothly
   useEffect(() => {
     if (isOpen) {
-      setShouldRender(true); // Pehle DOM mein add karo
+      setShouldRender(true);
       const timer = setTimeout(() => {
         setAnimate(true);
         if (jobtitleRef.current)
            jobtitleRef.current.focus();
-      }, 10); // Phir smooth entry chalao
+      }, 10);
 
       return () => clearTimeout(timer);
     } else {
-      setAnimate(false); // Pehle smooth exit animation chalao
-      const timer = setTimeout(() => setShouldRender(false), 500); // 500ms baad DOM se hatao (duration-500 match hona chahiye)
+      setAnimate(false);
+      const timer = setTimeout(() => setShouldRender(false), 500); 
       return () => clearTimeout(timer);
     }
   }, [isOpen]);
 
-  // 🔥 CUSTOM CLOSE FUNCTION: Jo pehle animation band karega, fir parent ko batayega
   const handleSmoothClose = () => {
-    setAnimate(false); // Exit animation shuru
+    setAnimate(false); // Exit animation start
     setTimeout(() => {
-      onClose(); // 500ms baad parent ki state false karega
+      onClose(); 
     }, 500);
   };
 
-  // Agar rendering state false hai toh kuch mat dikhao
+  // dont show component at all if shouldRender is false, this allows exit animation to play before unmounting
   if (!shouldRender) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 🚫 Stop $0 or negative values instantly
     if (!formData.price || Number(formData.price) <= 0) {
-      alert("Price should be atleast $1");
+      showNotification("Price should be atleast $1", "error"); 
       return;
     }
 
@@ -54,7 +52,7 @@ const PostJob = ({ isOpen, onClose, onJobAdded }) => {
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
-        alert("Bhai, pehle login toh kar lo!");
+        showNotification("Bhai, pehle login toh kar lo!", "error");
         setIsPosting(false);
         return;
       }
@@ -70,12 +68,13 @@ const PostJob = ({ isOpen, onClose, onJobAdded }) => {
 
       if (error) throw error;
 
-      alert("Gig Posted Successfully! 🚀");
+      // 🎯 Success Toast Notification trigger!
+      showNotification("Gig Posted Successfully!", "success");
       setFormData({ title: '', category: 'Web Dev', price: '' });
-      onJobAdded(); // Refresh list
-      handleSmoothClose(); // Smoothly close karo success par bhi!
+      onJobAdded(); 
+      handleSmoothClose();
     } catch (error) {
-      alert("Error: " + error.message);
+      showNotification(`Error: ${error.message}`, "error");
     } finally {
       setIsPosting(false);
     }
@@ -89,7 +88,7 @@ const PostJob = ({ isOpen, onClose, onJobAdded }) => {
         ? 'bg-black/60 backdrop-blur-md opacity-100' 
         : 'bg-transparent backdrop-blur-none opacity-0'
       }`}
-      onClick={handleSmoothClose} // Baahar click par custom smooth close
+      onClick={handleSmoothClose}
     >
       {/* MODAL CONTENT: handles smooth scale-down and slide-down */}
       <div
@@ -115,7 +114,7 @@ const PostJob = ({ isOpen, onClose, onJobAdded }) => {
           </div>
           <button
             type="button"
-            onClick={handleSmoothClose} // Button click par custom smooth close
+            onClick={handleSmoothClose}
             className="p-2 hover:bg-white/5 rounded-full text-slate-500 hover:text-white transition-all hover:rotate-90 duration-300"
           >
             <X size={20} />
