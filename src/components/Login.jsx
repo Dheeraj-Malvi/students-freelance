@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
@@ -12,6 +12,15 @@ const Login = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+
+  const emailRef = useRef(null);
+
+  useEffect(() => {
+  const timer = setTimeout(() => {
+    if (emailRef.current) emailRef.current.focus();
+  }, 50); 
+  return () => clearTimeout(timer);
+}, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -105,6 +114,7 @@ const Login = () => {
               <input
                 type="email"
                 className="w-full bg-slate-950 border border-slate-800 p-4 rounded-xl text-white outline-none focus:border-blue-500/50 transition-all font-medium placeholder:text-slate-700"
+                ref={emailRef}
                 placeholder="name@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}

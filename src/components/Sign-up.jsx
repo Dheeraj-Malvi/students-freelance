@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState, useRef, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
@@ -12,6 +12,15 @@ const Signup = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState('student');
+
+  const emailRef = useRef(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (emailRef.current) emailRef.current.focus();
+    }, 50);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -115,6 +124,7 @@ const Signup = () => {
               <input
                 type="email"
                 className="w-full bg-slate-950/50 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-emerald-500/50 transition-all"
+                ref={emailRef}
                 placeholder="example@student.com"
                 onChange={(e) => setEmail(e.target.value)}
                 required
