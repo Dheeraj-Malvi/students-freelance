@@ -15,7 +15,6 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({ 
     plugins: [react()],
-    // Sabse asaan tarika: Relative path use karo
-    // Isse '/' ya '/students-freelance/' ka jhamela hi khatam
-    base: './',
+    // Use relative base path for both development and production
+    base: '/',
 })
