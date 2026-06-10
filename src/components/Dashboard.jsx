@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
-import { Search, Plus, ArrowRight, Check, X, Clock, Sparkles, Globe } from 'lucide-react';
+import { Search, Plus, ArrowRight, Check, X, Clock, Sparkles, Globe, Upload, FileText, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import PostJob from './PostJob';
 
@@ -32,21 +32,26 @@ const Dashboard = () => {
     const [stats, setStats] = useState({ active: 0, completed: 0, earnings: 0 });
     const [isFocused, setIsFocused] = useState(false);
 
+    // 🟢 NEW STATES FOR RESUME MODAL & COMPILATION
+    const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
+    const [selectedJobId, setSelectedJobId] = useState(null);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [uploadingResume, setUploadingResume] = useState(false);
+
     const [toast, setToast] = useState({ show: false, message: "", type: "success" });
-    const [toastStatus, setToastStatus] = useState("idle"); // "idle" | "showing" | "vanishing"
+    const [toastStatus, setToastStatus] = useState("idle"); 
 
     const handleCloseToast = useCallback(() => {
         setTimeout(() => {
-            setToast(prev => ({ ...prev, show: false })); // 2. Then state se hatayege
+            setToast(prev => ({ ...prev, show: false })); 
             setToastStatus("idle");
-        }, 400); // Smooth animation ka complete buffer duration (400ms)
+        }, 400); 
     }, []);
 
     const showNotification = useCallback((message, type = "success") => {
         setToast({ show: true, message, type });
         setToastStatus("showing");
 
-        // 4.5 Seconds tak rukega, fir smoothly transitions ke sath fade out hoga
         const timer = setTimeout(() => {
             handleCloseToast();
         }, 4500);
@@ -97,12 +102,88 @@ const Dashboard = () => {
         fetchDashboardData();
     }, [userRole, fetchUserSkills, fetchDashboardData]);
 
-    const handleApply = async (jobId) => {
-        const { error } = await supabase.from('applications').insert([{ job_id: jobId, applicant_id: user.id, status: 'pending' }]);
-        if (!error) {
-            showNotification("Applied Successfully!");
-            fetchDashboardData();
+    // 🟢 CLICK HANDLER FROM GIG CARD (TRIPWIRE FOR MODAL)
+    const handleApplyClick = (jobId) => {
+        setSelectedJobId(jobId);
+        setSelectedFile(null); // Reset prev state
+        setIsResumeModalOpen(true);
+    };
+
+    // 🟢 CORE LOGIC: VALIDATION -> STORAGE UPLOAD -> PROFILE UPDATE -> JOB APPLICATION
+    const handleResumeSubmit = async (e) => {
+        e.preventDefault();
+        if (!selectedFile) {
+            showNotification("Please select a PDF file first!", "error");
+            return;
         }
+
+        try {
+            setUploadingResume(true);
+
+            // Path formatting setup
+            const fileExt = 'pdf';
+            const fileName = `resume_${user.id}_${Date.now()}.${fileExt}`;
+            const filePath = `${fileName}`;
+
+            // 1. Upload file to Supabase Storage 'resume' Bucket
+            const { error: uploadError } = await supabase.storage
+                .from('resumes')
+                .upload(filePath, selectedFile, { cacheControl: '3600', upsert: true });
+
+            if (uploadError) throw uploadError;
+
+            // 2. Extract Public URL
+            const { data: { publicUrl } } = supabase.storage
+                .from('resumes')
+                .getPublicUrl(filePath);
+
+            // 3. Update profile with latest resume reference
+            const { error: profileUpdateError } = await supabase
+                .from('profiles')
+                .update({ resume_url: publicUrl })
+                .eq('id', user.id);
+
+            if (profileUpdateError) throw profileUpdateError;
+
+            // 4. Submit Job Application
+            const { error: appError } = await supabase
+                .from('applications')
+                .insert([{ job_id: selectedJobId, applicant_id: user.id, status: 'pending' }]);
+
+            if (appError) throw appError;
+
+            // Success Execution Sequence
+            showNotification("Applied Successfully!");
+            setIsResumeModalOpen(false);
+            fetchDashboardData();
+
+        } catch (error) {
+            console.error('Submission ledger break:', error);
+            showNotification("Failed to submit application process.", "error");
+        } finally {
+            setUploadingResume(false);
+        }
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Strict PDF Check
+        if (file.type !== "application/pdf" && !file.name.endsWith('.pdf')) {
+            showNotification("Strictly PDF format is accepted!", "error");
+            setSelectedFile(null);
+            return;
+        }
+
+        // Size Restriction (Max 5MB Safety Block)
+        if (file.size > 5 * 1024 * 1024) {
+            showNotification("File size must be under 5MB!", "error");
+            setSelectedFile(null);
+            return;
+        }
+
+        setSelectedFile(file);
     };
 
     const filteredGigs = myGigs.filter(gig => {
@@ -118,9 +199,7 @@ const Dashboard = () => {
 
             if (userSkills.length > 0) {
                 if (!gig.skills || !Array.isArray(gig.skills) || gig.skills.length === 0) return false;
-
                 const cleanGigSkills = gig.skills.map(s => s.trim().toLowerCase());
-                
                 return userSkills.some(studentSkill => 
                     cleanGigSkills.includes(studentSkill.trim())
                 );
@@ -254,7 +333,7 @@ const Dashboard = () => {
                                     userRole={userRole}
                                     isAlreadyApplied={appliedJobs.includes(item.id)}
                                     isEligible={isEligible}
-                                    onApply={handleApply}
+                                    onApply={handleApplyClick} // 🟢 Linked to Open Modal trigger
                                     navigate={navigate}
                                 />
                             );
@@ -280,6 +359,86 @@ const Dashboard = () => {
                             )}
                         </div>
                     )}
+                </div>
+            )}
+
+            {/* 🟢 NEW UPLOAD RESUME MODAL POPUP FOR STUDENTS */}
+            {isResumeModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
+                    <div className="relative w-full max-w-md p-6 bg-slate-900/95 border border-white/10 rounded-2xl shadow-2xl backdrop-blur-xl animate-in zoom-in-95 duration-300">
+                        <button
+                            type="button"
+                            onClick={() => !uploadingResume && setIsResumeModalOpen(false)}
+                            className="absolute top-4 right-4 p-1.5 rounded-xl bg-white/5 border border-white/5 text-slate-400 hover:text-white transition-all duration-300 hover:bg-white/10"
+                        >
+                            <X size={14} />
+                        </button>
+
+                        <div className="mb-4">
+                            <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                                <FileText size={16} className="text-blue-400" /> Apply Sequence Initialization
+                            </h3>
+                            <p className="text-[11px] text-slate-400 mt-1 font-medium">
+                                A dynamic copy of your resume (PDF) is required by the client to authorize and transition this deal context.
+                            </p>
+                        </div>
+
+                        <form onSubmit={handleResumeSubmit} className="space-y-4">
+                            <label className={`group border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all duration-300 text-center select-none
+                                ${selectedFile 
+                                    ? 'border-blue-500/40 bg-blue-500/5' 
+                                    : 'border-white/10 bg-white/0 hover:border-white/20 hover:bg-white/5'}`}
+                            >
+                                <input 
+                                    type="file" 
+                                    accept="application/pdf" 
+                                    onChange={handleFileChange} 
+                                    disabled={uploadingResume}
+                                    className="hidden" 
+                                />
+                                {selectedFile ? (
+                                    <>
+                                        <FileText size={24} className="text-blue-400 animate-bounce" />
+                                        <p className="text-xs font-bold text-white max-w-[240px] truncate uppercase tracking-wide">
+                                            {selectedFile.name}
+                                        </p>
+                                        <p className="text-[10px] text-slate-500 font-semibold">
+                                            {((selectedFile.size) / (1024 * 1024)).toFixed(2)} MB • Ready
+                                        </p>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Upload size={24} className="text-slate-500 group-hover:text-blue-400 transition-colors duration-300" />
+                                        <p className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                                            Select PDF Resume
+                                        </p>
+                                        <p className="text-[10px] text-slate-500 font-medium">
+                                            Strictly PDF up to 5MB allocations
+                                        </p>
+                                    </>
+                                )}
+                            </label>
+
+                           <button
+    type="submit"
+    disabled={uploadingResume || !selectedFile}
+    className={`w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 border transition-all duration-300
+        ${uploadingResume || !selectedFile
+            ? 'bg-slate-800 text-slate-600 border-transparent cursor-not-allowed shadow-none'
+            : 'bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white border-blue-500/20 hover:border-blue-500 shadow-lg shadow-blue-500/5 hover:shadow-blue-600/20 active:scale-[0.98]'}`}
+>
+    {uploadingResume ? (
+        <>
+            <Loader size={12} className="animate-spin text-blue-400" /> Processing Ledger...
+        </>
+    ) : (
+        <>
+            Confirm & Submit Application ➔
+        </>
+    )}
+</button>
+                        </form>
+                    </div>
                 </div>
             )}
 
@@ -311,12 +470,10 @@ const Dashboard = () => {
                 </div>
             )}
         </>
-
     );
 };
 
 const GigCard = ({ item, userRole, isAlreadyApplied, isEligible, onApply, navigate }) => {
-    // BUTTON DISABLE IF STUDENT AND NOT ELIGIBLE
     const isButtonDisabled = isAlreadyApplied || (userRole === 'student' && !isEligible);
 
     return (
@@ -363,8 +520,8 @@ const GigCard = ({ item, userRole, isAlreadyApplied, isEligible, onApply, naviga
                     className={`relative group/btn overflow-hidden text-[10px] w-full md:w-auto px-5 py-2.5 rounded-xl font-black uppercase flex items-center justify-center gap-2 transition-all duration-300 border tracking-widest
                         ${isButtonDisabled
                             ? isAlreadyApplied 
-                                ? 'bg-slate-800 text-slate-500 border-white/5 cursor-not-allowed' // Already Applied
-                                : 'bg-rose-950/20 text-rose-400/60 border-rose-900/30 cursor-not-allowed shadow-none' // 🔴 Muted Red for Not Eligible
+                                ? 'bg-slate-800 text-slate-500 border-white/5 cursor-not-allowed' 
+                                : 'bg-rose-950/20 text-rose-400/60 border-rose-900/30 cursor-not-allowed shadow-none' 
                             : 'bg-blue-600/10 hover:bg-white/10 text-white border-white/10 hover:border-blue-500/50 hover:text-blue-200 shadow-[0_0_20px_rgba(37,99,235,0.1)] hover:shadow-[0_0_30px_rgba(37,99,235,0.3)]'
                         }`}
                 >
@@ -376,7 +533,7 @@ const GigCard = ({ item, userRole, isAlreadyApplied, isEligible, onApply, naviga
                             isAlreadyApplied ? (
                                 <>Applied <Check size={14} className="animate-in zoom-in duration-300 text-emerald-400" /></>
                             ) : !isEligible ? (
-                                <>Not Eligible <X size={14} className="text-rose-400 animate-in scale-in duration-200" /></> // 🔴 Text change if not matching
+                                <>Not Eligible <X size={14} className="text-rose-400 animate-in scale-in duration-200" /></> 
                             ) : (
                                 <>Apply Now <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform duration-300" /></>
                             )
@@ -389,6 +546,7 @@ const GigCard = ({ item, userRole, isAlreadyApplied, isEligible, onApply, naviga
         </div>
     );
 };
+
 const StatsCard = ({ title, value, color = "text-white" }) => (
     <div className="p-6 bg-slate-900/50 border border-white/5 rounded-2xl backdrop-blur-md shadow-lg shadow-black/20">
         <p className="text-slate-500 text-[10px] font-black uppercase mb-2 tracking-widest">{title}</p>

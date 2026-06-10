@@ -25,71 +25,79 @@ const GigApplications = () => {
     return () => clearTimeout(timer);
 }, []);
 
-    const fetchApplicants = useCallback(async () => {
-        if (!jobId) {
-            console.log("❌ DEBUG: could not fetch jobid from URL !");
-            return;
+const fetchApplicants = useCallback(async () => {
+    if (!jobId) {
+        console.log("❌ DEBUG: could not fetch jobid from URL !");
+        return;
+    }
+
+    setLoading(true);
+    try {
+        console.log("🚀 DEBUG 1: Fetching process started for Job ID:", jobId);
+
+        // 1. Job Title check karo
+        const { data: jobData, error: jobError } = await supabase.from('jobs').select('title').eq('id', jobId).single();
+        console.log("📊 DEBUG 2: found from jobs table ->", { jobData, jobError });
+        if (jobData) setJobTitle(jobData.title);
+
+        // 2. Applications table check karo
+        console.log("📡 DEBUG 3: hitting query to applications table...");
+        const { data: appsData, error: appsError } = await supabase
+            .from('applications')
+            .select('*')
+            .eq('job_id', jobId);
+
+        console.log("📊 DEBUG 4: Applications table raw data ->", appsData);
+        if (appsError) {
+            console.error("🚨 DEBUG ERROR (Applications Fetch):", appsError.message);
+            throw appsError;
         }
 
-        setLoading(true);
-        try {
-            console.log("🚀 DEBUG 1: Fetching process started for Job ID:", jobId);
+        if (appsData && appsData.length > 0) {
+            const applicantIds = appsData.map(app => app.applicant_id);
+            console.log("🆔 DEBUG 5: Mapped Applicant IDs:", applicantIds);
 
-            // 1. Job Title check karo
-            const { data: jobData, error: jobError } = await supabase.from('jobs').select('title').eq('id', jobId).single();
-            console.log("📊 DEBUG 2: found from jobs table ->", { jobData, jobError });
-            if (jobData) setJobTitle(jobData.title);
+            // 3. Profiles table check karo (Yahan humne 'resume_url' explicitly add kiya hai)
+            console.log("📡 DEBUG 6: hitting query to profiles table...");
+            const { data: profilesData, error: profilesError } = await supabase
+                .from('profiles')
+                .select('id, full_name, skills, email, avatar_url, resume_url') // 👈 humne resume_url yahan manga hai
+                .in('id', applicantIds);
 
-            // 2. Applications table check karo
-            console.log("📡 DEBUG 3: hitting query to applications table...");
-            const { data: appsData, error: appsError } = await supabase
-                .from('applications')
-                .select('*')
-                .eq('job_id', jobId);
-
-            console.log("📊 DEBUG 4: Applications table raw data ->", appsData);
-            if (appsError) {
-                console.error("🚨 DEBUG ERROR (Applications Fetch):", appsError.message);
-                throw appsError;
+            console.log("📊 DEBUG 7: Profiles table's raw data directly from Supabase ->", profilesData);
+            if (profilesError) {
+                console.error("🚨 DEBUG ERROR (Profiles Fetch):", profilesError.message);
             }
 
-            if (appsData && appsData.length > 0) {
-                const applicantIds = appsData.map(app => app.applicant_id);
-                console.log("🆔 DEBUG 5: Mapped Applicant IDs:", applicantIds);
-
-                // 3. Profiles table check karo
-                console.log("📡 DEBUG 6: hitting query to profiles table...");
-                const { data: profilesData, error: profilesError } = await supabase
-                    .from('profiles')
-                    .select('id, full_name, skills, email, avatar_url')
-                    .in('id', applicantIds);
-
-                console.log("📊 DEBUG 7: Profiles table's raw data ->", profilesData);
-                if (profilesError) {
-                    console.error("🚨 DEBUG ERROR (Profiles Fetch):", profilesError.message);
-                }
-
-                // 4. Combine process check karo
-                const combinedData = appsData.map(app => {
-                    const studentProfile = profilesData?.find(p => p.id === app.applicant_id);
-                    return {
-                        ...app,
-                        profiles: studentProfile || null
-                    };
+            // 4. Combine process check karo
+            const combinedData = appsData.map(app => {
+                const studentProfile = profilesData?.find(p => p.id === app.applicant_id);
+                
+                // 🔥 Individual logic log taaki pata chale kis user ka resume pass ho raha hai aur kiska nahi
+                console.log(`🔍 DEBUG PROFILE CHECK for ${studentProfile?.full_name || 'Unknown'}:`, {
+                    id: studentProfile?.id,
+                    has_resume_url: studentProfile ? 'resume_url' in studentProfile : false,
+                    resume_url_value: studentProfile?.resume_url
                 });
 
-                console.log("🎯 DEBUG 8: Final Combined Data jo state me jaa raha hai ->", combinedData);
-                setApplicants(combinedData);
-            } else {
-                console.log("⚠️ DEBUG: Applications array empty aaya hai DB se!");
-                setApplicants([]);
-            }
-        } catch (err) {
-            console.error("🚨 DEBUG GLOBAL CATCH ERROR:", err.message);
-        } finally {
-            setLoading(false);
+                return {
+                    ...app,
+                    profiles: studentProfile || null
+                };
+            });
+
+            console.log("🎯 DEBUG 8: Final Combined Data jo state me jaa raha hai ->", combinedData);
+            setApplicants(combinedData);
+        } else {
+            console.log("⚠️ DEBUG: Applications array empty aaya hai DB se!");
+            setApplicants([]);
         }
-    }, [jobId]);
+    } catch (err) {
+        console.error("🚨 DEBUG GLOBAL CATCH ERROR:", err.message);
+    } finally {
+        setLoading(false);
+    }
+}, [jobId]);
 
     useEffect(() => {
         fetchApplicants();
@@ -213,6 +221,23 @@ const GigApplications = () => {
                                 <div className="flex items-center gap-2 text-xs text-slate-400 bg-white/[0.02] border border-white/5 p-2.5 rounded-xl mb-4 shadow-inner">
                                     <Mail size={14} className="text-slate-500" />
                                     <span className="truncate">{app.profiles?.email}</span>
+                                </div>
+
+                                <div className="mb-4">
+                                    {app.profiles?.resume_url ? (
+                                        <a
+                                            href={app.profiles.resume_url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full py-2.5 bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-500/20 text-[11px] font-black uppercase tracking-wider rounded-xl flex items-center justify-center gap-1.5 transition-all duration-300"
+                                        >
+                                            View Candidate Resume
+                                        </a>
+                                    ) : (
+                                        <div className="w-full py-2.5 bg-white/[0.01] border border-white/5 border-dashed text-[11px] font-bold text-slate-600 uppercase tracking-wider rounded-xl text-center italic">
+                                            No Resume Uploaded
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="mb-6">
