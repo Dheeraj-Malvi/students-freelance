@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabaseClient';
 import { X, Briefcase } from 'lucide-react';
 
 const PostJob = ({ isOpen, onClose, onJobAdded, showNotification }) => { // 👈 1. Prop receive kiya yahan
-  const [formData, setFormData] = useState({ title: '', category: 'Web Dev', price: '' });
+  const [formData, setFormData] = useState({ title: '', category: 'Web Dev', price: '', skills: '' });
   const [isPosting, setIsPosting] = useState(false);
   const [animate, setAnimate] = useState(false); // Controls transition trigger
   const [shouldRender, setShouldRender] = useState(isOpen); // Controls actual DOM mounting
@@ -57,12 +57,17 @@ const PostJob = ({ isOpen, onClose, onJobAdded, showNotification }) => { // 👈
         return;
       }
 
+      const skillsArray = formData.skills
+        ? formData.skills.split(',').map(skill => skill.trim()).filter(skill => skill !== '')
+        : [];
+
       const { error } = await supabase
         .from('jobs')
         .insert([{
           title: formData.title,
           category: formData.category,
           price: formData.price,
+          skills: skillsArray,
           user_id: user.id
         }]);
 
@@ -70,7 +75,7 @@ const PostJob = ({ isOpen, onClose, onJobAdded, showNotification }) => { // 👈
 
       // 🎯 Success Toast Notification trigger!
       showNotification("Gig Posted Successfully!", "success");
-      setFormData({ title: '', category: 'Web Dev', price: '' });
+      setFormData({ title: '', category: 'Web Dev', price: '', skills: '' });
       onJobAdded(); 
       handleSmoothClose();
     } catch (error) {
@@ -171,6 +176,21 @@ const PostJob = ({ isOpen, onClose, onJobAdded, showNotification }) => { // 👈
               />
             </div>
           </div>
+
+          <div>
+            <label className="text-slate-500 text-[10px] font-black uppercase ml-1 mb-2 block tracking-[0.2em]">
+              Required Skills (Comma Separated)
+            </label>
+            <input
+              type="text"
+              className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-white text-sm outline-none focus:border-blue-500/50 transition-all shadow-inner duration-300"
+              placeholder="e.g. React, Tailwind, Supabase"
+              value={formData.skills}
+              onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
+              required
+            />
+          </div>
+
 
           {/* Action Button */}
           <button

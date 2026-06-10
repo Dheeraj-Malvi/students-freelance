@@ -36,7 +36,6 @@ const Dashboard = () => {
     const [toastStatus, setToastStatus] = useState("idle"); // "idle" | "showing" | "vanishing"
 
     const handleCloseToast = useCallback(() => {
-        setToastStatus("vanishing"); // 1. Pehle vanish class trigger hogi transition ke liye
         setTimeout(() => {
             setToast(prev => ({ ...prev, show: false })); // 2. Then state se hatayege
             setToastStatus("idle");
@@ -106,7 +105,6 @@ const Dashboard = () => {
         }
     };
 
-    // 🟢 FIXED FILTERING: Tabs strict toggle karenge, chahe user skills khali ho ya bhari
     const filteredGigs = myGigs.filter(gig => {
         const matchesSearch = gig.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             gig.category?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -115,12 +113,19 @@ const Dashboard = () => {
         if (userRole === 'client' || activeTab === 'explore') return true;
 
         if (activeTab === 'for-you') {
+            const isApplied = appliedJobs.includes(gig.id);
+            if (isApplied) return true;
+
             if (userSkills.length > 0) {
-                const gigCategory = gig.category?.toLowerCase() || "";
-                const gigTitle = gig.title?.toLowerCase() || "";
-                return userSkills.some(skill => gigCategory.includes(skill) || gigTitle.includes(skill));
+                if (!gig.skills || !Array.isArray(gig.skills) || gig.skills.length === 0) return false;
+
+                const cleanGigSkills = gig.skills.map(s => s.trim().toLowerCase());
+                
+                return userSkills.some(studentSkill => 
+                    cleanGigSkills.includes(studentSkill.trim())
+                );
             }
-            return false; // Agar skills zero hain toh list khali karo taaki custom msg placeholder active ho sake
+            return false;
         }
         return true;
     });
@@ -237,16 +242,23 @@ const Dashboard = () => {
             ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     {filteredGigs.length > 0 ? (
-                        filteredGigs.map(item => (
-                            <GigCard
-                                key={item.id}
-                                item={item}
-                                userRole={userRole}
-                                isAlreadyApplied={appliedJobs.includes(item.id)}
-                                onApply={handleApply}
-                                navigate={navigate}
-                            />
-                        ))
+                        filteredGigs.map(item => {
+                            const isEligible = !item.skills || item.skills.length === 0 || (
+                                userSkills.length > 0 && item.skills.some(skill => userSkills.includes(skill.toLowerCase().trim()))
+                            );
+
+                            return (
+                                <GigCard
+                                    key={item.id}
+                                    item={item}
+                                    userRole={userRole}
+                                    isAlreadyApplied={appliedJobs.includes(item.id)}
+                                    isEligible={isEligible}
+                                    onApply={handleApply}
+                                    navigate={navigate}
+                                />
+                            );
+                        })
                     ) : (
                         <div className="p-8 bg-slate-900/20 border border-white/5 border-dashed rounded-2xl col-span-1 lg:col-span-2 text-center py-12 mt-2">
                             <p className="text-slate-400 text-xs font-semibold tracking-wide">
@@ -260,13 +272,12 @@ const Dashboard = () => {
                                     onClick={() => setActiveTab('explore')}
                                     className="relative group/shiny overflow-hidden mt-4 text-[10px] font-black uppercase tracking-widest bg-white/5 backdrop-blur-md border border-white/10 hover:border-blue-500/40 text-blue-400 hover:text-white px-5 py-3 rounded-xl transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]"
                                 >
-                                    {/* 🌟 PREMIUM GLOSSY SHINE EFFECT OVERLAY */}
                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/shiny:translate-x-full transition-transform duration-1000 ease-out pointer-events-none" />
-
                                     <span className="relative z-10 flex items-center justify-center gap-1.5">
                                         Browse General Marketplace
                                     </span>
-                                </button>)}
+                                </button>
+                            )}
                         </div>
                     )}
                 </div>
@@ -304,52 +315,80 @@ const Dashboard = () => {
     );
 };
 
-const GigCard = ({ item, userRole, isAlreadyApplied, onApply, navigate }) => (
-    <div className="group relative p-5 bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-blue-500/30 transition-all duration-300">
-        <div className="relative z-10 w-full md:w-auto">
-            <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 text-[8px] font-bold rounded uppercase border border-blue-500/20 shadow-sm">
-                {item.category}
-            </span>
-            <p className="text-white font-bold text-sm uppercase mt-1.5 group-hover:text-blue-400 transition-colors duration-300 leading-snug">
-                {item.title}
-            </p>
-            <div className="flex flex-wrap items-center gap-2 mt-1.5 text-[9px] text-slate-500 font-semibold tracking-wide">
-                <span className="text-emerald-400 bg-emerald-500/5 px-1.5 py-0.5 rounded border border-emerald-500/10">
-                    ${item.price} • Active
+const GigCard = ({ item, userRole, isAlreadyApplied, isEligible, onApply, navigate }) => {
+    // BUTTON DISABLE IF STUDENT AND NOT ELIGIBLE
+    const isButtonDisabled = isAlreadyApplied || (userRole === 'student' && !isEligible);
+
+    return (
+        <div className="group relative p-5 bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-blue-500/30 transition-all duration-300">
+            <div className="relative z-10 w-full md:w-auto">
+                <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 text-[8px] font-bold rounded uppercase border border-blue-500/20 shadow-sm">
+                    {item.category}
                 </span>
-                <span className="text-slate-700">•</span>
-                <div className="flex items-center gap-1 text-slate-400/80">
-                    <Clock size={11} className="text-slate-500" />
-                    <span>{formatTimeAgo(item.created_at)}</span>
+                <p className="text-white font-bold text-sm uppercase mt-1.5 group-hover:text-blue-400 transition-colors duration-300 leading-snug">
+                    {item.title}
+                </p>
+                <div className="flex flex-wrap items-center gap-2 mt-1.5 text-[9px] text-slate-500 font-semibold tracking-wide">
+                    <span className="text-emerald-400 bg-emerald-500/5 px-1.5 py-0.5 rounded border border-emerald-500/10">
+                        ${item.price} • Active
+                    </span>
+                    <span className="text-slate-700">•</span>
+                    <div className="flex items-center gap-1 text-slate-400/80">
+                        <Clock size={11} className="text-slate-500" />
+                        <span>{formatTimeAgo(item.created_at)}</span>
+                    </div>
                 </div>
+                {item.skills && item.skills.length > 0 && (
+                    <div className="mt-3 pt-2.5 border-t border-white/5 w-full">
+                        <p className="text-[8px] font-black tracking-widest text-slate-500 uppercase mb-1.5">
+                            Required Skills
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                            {item.skills.map((skill, index) => (
+                                <span
+                                    key={index}
+                                    className="inline-block text-[9px] font-black bg-amber-500/10 border border-amber-500/20 text-amber-400 px-2 py-0.5 rounded-md uppercase tracking-wide shadow-sm"
+                                >
+                                    {skill}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+            <div className="relative z-10 w-full md:w-auto pt-3 md:pt-0 border-t border-white/5 md:border-none shrink-0">
+                <button
+                    disabled={isButtonDisabled}
+                    onClick={() => userRole === 'student' ? onApply(item.id) : navigate(`/GigApplications/${item.id}`)}
+                    className={`relative group/btn overflow-hidden text-[10px] w-full md:w-auto px-5 py-2.5 rounded-xl font-black uppercase flex items-center justify-center gap-2 transition-all duration-300 border tracking-widest
+                        ${isButtonDisabled
+                            ? isAlreadyApplied 
+                                ? 'bg-slate-800 text-slate-500 border-white/5 cursor-not-allowed' // Already Applied
+                                : 'bg-rose-950/20 text-rose-400/60 border-rose-900/30 cursor-not-allowed shadow-none' // 🔴 Muted Red for Not Eligible
+                            : 'bg-blue-600/10 hover:bg-white/10 text-white border-white/10 hover:border-blue-500/50 hover:text-blue-200 shadow-[0_0_20px_rgba(37,99,235,0.1)] hover:shadow-[0_0_30px_rgba(37,99,235,0.3)]'
+                        }`}
+                >
+                    {!isButtonDisabled && (
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 ease-out pointer-events-none"></div>
+                    )}
+                    <span className="relative z-10 flex items-center gap-2 w-full justify-center">
+                        {userRole === 'student' ? (
+                            isAlreadyApplied ? (
+                                <>Applied <Check size={14} className="animate-in zoom-in duration-300 text-emerald-400" /></>
+                            ) : !isEligible ? (
+                                <>Not Eligible <X size={14} className="text-rose-400 animate-in scale-in duration-200" /></> // 🔴 Text change if not matching
+                            ) : (
+                                <>Apply Now <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform duration-300" /></>
+                            )
+                        ) : (
+                            <>View Applicants <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform duration-300" /></>
+                        )}
+                    </span>
+                </button>
             </div>
         </div>
-        <div className="relative z-10 w-full md:w-auto pt-3 md:pt-0 border-t border-white/5 md:border-none shrink-0">
-            <button
-                disabled={isAlreadyApplied}
-                onClick={() => userRole === 'student' ? onApply(item.id) : navigate(`/GigApplications/${item.id}`)}
-                className={`relative group/btn overflow-hidden text-[10px] w-full md:w-auto px-5 py-2.5 rounded-xl font-black uppercase flex items-center justify-center gap-2 transition-all duration-300 border tracking-widest
-                    ${isAlreadyApplied
-                        ? 'bg-slate-800 text-slate-500 border-white/5 cursor-not-allowed'
-                        : 'bg-blue-600/10 hover:bg-white/10 text-white border-white/10 hover:border-blue-500/50 hover:text-blue-200 shadow-[0_0_20px_rgba(37,99,235,0.1)] hover:shadow-[0_0_30px_rgba(37,99,235,0.3)]'
-                    }`}
-            >
-                {!isAlreadyApplied && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 ease-out pointer-events-none"></div>
-                )}
-                <span className="relative z-10 flex items-center gap-2 w-full justify-center">
-                    {userRole === 'student' ? (isAlreadyApplied ? "Applied" : "Apply Now") : "View Applicants"}
-                    {isAlreadyApplied ? (
-                        <Check size={14} className="animate-in zoom-in duration-300 text-emerald-400" />
-                    ) : (
-                        <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform duration-300" />
-                    )}
-                </span>
-            </button>
-        </div>
-    </div>
-);
-
+    );
+};
 const StatsCard = ({ title, value, color = "text-white" }) => (
     <div className="p-6 bg-slate-900/50 border border-white/5 rounded-2xl backdrop-blur-md shadow-lg shadow-black/20">
         <p className="text-slate-500 text-[10px] font-black uppercase mb-2 tracking-widest">{title}</p>
