@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
-import { Search, Plus, ArrowRight, Check, X, Clock, Sparkles, Globe, Upload, FileText, Loader2 } from 'lucide-react';
+import { Search, Plus, ArrowRight, Check, X, Clock, Sparkles, Globe, Upload, FileText, Loader } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import PostJob from './PostJob';
 
@@ -39,13 +39,13 @@ const Dashboard = () => {
     const [uploadingResume, setUploadingResume] = useState(false);
 
     const [toast, setToast] = useState({ show: false, message: "", type: "success" });
-    const [toastStatus, setToastStatus] = useState("idle"); 
+    const [toastStatus, setToastStatus] = useState("idle");
 
     const handleCloseToast = useCallback(() => {
         setTimeout(() => {
-            setToast(prev => ({ ...prev, show: false })); 
+            setToast(prev => ({ ...prev, show: false }));
             setToastStatus("idle");
-        }, 400); 
+        }, 400);
     }, []);
 
     const showNotification = useCallback((message, type = "success") => {
@@ -148,7 +148,12 @@ const Dashboard = () => {
             // 4. Submit Job Application
             const { error: appError } = await supabase
                 .from('applications')
-                .insert([{ job_id: selectedJobId, applicant_id: user.id, status: 'pending' }]);
+                .insert([{
+                    job_id: selectedJobId,
+                    applicant_id: user.id,
+                    status: 'pending',
+                    resume_url: publicUrl, // Store resume link with application for client access
+                }]);
 
             if (appError) throw appError;
 
@@ -200,7 +205,7 @@ const Dashboard = () => {
             if (userSkills.length > 0) {
                 if (!gig.skills || !Array.isArray(gig.skills) || gig.skills.length === 0) return false;
                 const cleanGigSkills = gig.skills.map(s => s.trim().toLowerCase());
-                return userSkills.some(studentSkill => 
+                return userSkills.some(studentSkill =>
                     cleanGigSkills.includes(studentSkill.trim())
                 );
             }
@@ -340,22 +345,45 @@ const Dashboard = () => {
                         })
                     ) : (
                         <div className="p-8 bg-slate-900/20 border border-white/5 border-dashed rounded-2xl col-span-1 lg:col-span-2 text-center py-12 mt-2">
-                            <p className="text-slate-400 text-xs font-semibold tracking-wide">
-                                {activeTab === 'for-you' && userSkills.length === 0
-                                    ? "Add your core skills in your profile dashboard to instantly unlock personalized recommendations! 🚀"
-                                    : "No active gigs found matching your current filters."}
-                            </p>
-                            {activeTab === 'for-you' && (
-                                <button
-                                    type="button"
-                                    onClick={() => setActiveTab('explore')}
-                                    className="relative group/shiny overflow-hidden mt-4 text-[10px] font-black uppercase tracking-widest bg-white/5 backdrop-blur-md border border-white/10 hover:border-blue-500/40 text-blue-400 hover:text-white px-5 py-3 rounded-xl transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]"
-                                >
-                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/shiny:translate-x-full transition-transform duration-1000 ease-out pointer-events-none" />
-                                    <span className="relative z-10 flex items-center justify-center gap-1.5">
-                                        Browse General Marketplace
-                                    </span>
-                                </button>
+                            {userRole === 'client' ? (
+                                // 💼 Recruiter/Client Custom Empty State Block
+                                <>
+                                    <p className="text-slate-400 text-xs font-semibold tracking-wide max-w-sm mx-auto leading-relaxed">
+                                        You haven't posted any active gigs matching this section yet. Click below to hire top-tier student talent at half the cost! 🚀
+                                    </p>
+                                            <div className="flex justify-center mt-4">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setIsPostModalOpen(true)}
+                                                    className="relative group overflow-hidden bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 hover:border-blue-500/50 px-5 py-2.5 h-11 rounded-2xl text-[10px] font-black uppercase flex items-center justify-center gap-2 transition-all duration-300 backdrop-blur-md shadow-[0_0_20px_rgba(59,130,246,0.1)] hover:shadow-[0_0_25px_rgba(59,130,246,0.2)] whitespace-nowrap w-full sm:w-auto shrink-0"
+                                                >
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                                                    <Plus size={14} className="group-hover:rotate-90 transition-transform duration-300 shrink-0" />
+                                                    Post New Gig
+                                                </button>
+                                            </div>
+                                </>
+                            ) : (
+                                // 🎓 Student Custom Empty State Block
+                                <>
+                                    <p className="text-slate-400 text-xs font-semibold tracking-wide">
+                                        {activeTab === 'for-you' && userSkills.length === 0
+                                            ? "Add your core skills in your profile dashboard to instantly unlock personalized recommendations! 🚀"
+                                            : "No active gigs found matching your current filters."}
+                                    </p>
+                                    {activeTab === 'for-you' && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setActiveTab('explore')}
+                                            className="relative group/shiny overflow-hidden mt-4 text-[10px] font-black uppercase tracking-widest bg-white/5 backdrop-blur-md border border-white/10 hover:border-blue-500/40 text-blue-400 hover:text-white px-5 py-3 rounded-xl transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]"
+                                        >
+                                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/shiny:translate-x-full transition-transform duration-1000 ease-out pointer-events-none" />
+                                            <span className="relative z-10 flex items-center justify-center gap-1.5">
+                                                Browse General Marketplace
+                                            </span>
+                                        </button>
+                                    )}
+                                </>
                             )}
                         </div>
                     )}
@@ -385,16 +413,16 @@ const Dashboard = () => {
 
                         <form onSubmit={handleResumeSubmit} className="space-y-4">
                             <label className={`group border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all duration-300 text-center select-none
-                                ${selectedFile 
-                                    ? 'border-blue-500/40 bg-blue-500/5' 
+                                ${selectedFile
+                                    ? 'border-blue-500/40 bg-blue-500/5'
                                     : 'border-white/10 bg-white/0 hover:border-white/20 hover:bg-white/5'}`}
                             >
-                                <input 
-                                    type="file" 
-                                    accept="application/pdf" 
-                                    onChange={handleFileChange} 
+                                <input
+                                    type="file"
+                                    accept="application/pdf"
+                                    onChange={handleFileChange}
                                     disabled={uploadingResume}
-                                    className="hidden" 
+                                    className="hidden"
                                 />
                                 {selectedFile ? (
                                     <>
@@ -419,24 +447,24 @@ const Dashboard = () => {
                                 )}
                             </label>
 
-                           <button
-    type="submit"
-    disabled={uploadingResume || !selectedFile}
-    className={`w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 border transition-all duration-300
+                            <button
+                                type="submit"
+                                disabled={uploadingResume || !selectedFile}
+                                className={`w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 border transition-all duration-300
         ${uploadingResume || !selectedFile
-            ? 'bg-slate-800 text-slate-600 border-transparent cursor-not-allowed shadow-none'
-            : 'bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white border-blue-500/20 hover:border-blue-500 shadow-lg shadow-blue-500/5 hover:shadow-blue-600/20 active:scale-[0.98]'}`}
->
-    {uploadingResume ? (
-        <>
-            <Loader size={12} className="animate-spin text-blue-400" /> Processing Ledger...
-        </>
-    ) : (
-        <>
-            Confirm & Submit Application ➔
-        </>
-    )}
-</button>
+                                        ? 'bg-slate-800 text-slate-600 border-transparent cursor-not-allowed shadow-none'
+                                        : 'bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white border-blue-500/20 hover:border-blue-500 shadow-lg shadow-blue-500/5 hover:shadow-blue-600/20 active:scale-[0.98]'}`}
+                            >
+                                {uploadingResume ? (
+                                    <>
+                                        <Loader size={12} className="animate-spin text-blue-400" /> Processing Ledger...
+                                    </>
+                                ) : (
+                                    <>
+                                        Confirm & Submit Application ➔
+                                    </>
+                                )}
+                            </button>
                         </form>
                     </div>
                 </div>
@@ -519,9 +547,9 @@ const GigCard = ({ item, userRole, isAlreadyApplied, isEligible, onApply, naviga
                     onClick={() => userRole === 'student' ? onApply(item.id) : navigate(`/GigApplications/${item.id}`)}
                     className={`relative group/btn overflow-hidden text-[10px] w-full md:w-auto px-5 py-2.5 rounded-xl font-black uppercase flex items-center justify-center gap-2 transition-all duration-300 border tracking-widest
                         ${isButtonDisabled
-                            ? isAlreadyApplied 
-                                ? 'bg-slate-800 text-slate-500 border-white/5 cursor-not-allowed' 
-                                : 'bg-rose-950/20 text-rose-400/60 border-rose-900/30 cursor-not-allowed shadow-none' 
+                            ? isAlreadyApplied
+                                ? 'bg-slate-800 text-slate-500 border-white/5 cursor-not-allowed'
+                                : 'bg-rose-950/20 text-rose-400/60 border-rose-900/30 cursor-not-allowed shadow-none'
                             : 'bg-blue-600/10 hover:bg-white/10 text-white border-white/10 hover:border-blue-500/50 hover:text-blue-200 shadow-[0_0_20px_rgba(37,99,235,0.1)] hover:shadow-[0_0_30px_rgba(37,99,235,0.3)]'
                         }`}
                 >
@@ -533,7 +561,7 @@ const GigCard = ({ item, userRole, isAlreadyApplied, isEligible, onApply, naviga
                             isAlreadyApplied ? (
                                 <>Applied <Check size={14} className="animate-in zoom-in duration-300 text-emerald-400" /></>
                             ) : !isEligible ? (
-                                <>Not Eligible <X size={14} className="text-rose-400 animate-in scale-in duration-200" /></> 
+                                <>Not Eligible <X size={14} className="text-rose-400 animate-in scale-in duration-200" /></>
                             ) : (
                                 <>Apply Now <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform duration-300" /></>
                             )
