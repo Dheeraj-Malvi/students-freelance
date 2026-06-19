@@ -16,14 +16,14 @@ const GigApplications = () => {
     const [isVisible, setIsVisible] = useState(false);
 
     const showNotification = useCallback((text, type) => {
-    setMessage({ text, type });
-    setIsVisible(true);
-    const timer = setTimeout(() => {
-        setMessage({ text: '', type: '' });
-        setIsVisible(false);
-    }, 5000);
-    return () => clearTimeout(timer);
-}, []);
+        setMessage({ text, type });
+        setIsVisible(true);
+        const timer = setTimeout(() => {
+            setMessage({ text: '', type: '' });
+            setIsVisible(false);
+        }, 5000);
+        return () => clearTimeout(timer);
+    }, []);
 
     const fetchApplicants = useCallback(async () => {
         if (!jobId) {
@@ -40,7 +40,7 @@ const GigApplications = () => {
             console.log("📊 DEBUG 2: found from jobs table ->", { jobData, jobError });
             if (jobData) setJobTitle(jobData.title);
 
-            // 2. Applications table check karo
+            // 2. Applications table check karo (Ab isme resume_url bhi aayega)
             console.log("📡 DEBUG 3: hitting query to applications table...");
             const { data: appsData, error: appsError } = await supabase
                 .from('applications')
@@ -57,14 +57,14 @@ const GigApplications = () => {
                 const applicantIds = appsData.map(app => app.applicant_id);
                 console.log("🆔 DEBUG 5: Mapped Applicant IDs:", applicantIds);
 
-                // 3. Profiles table check karo
+                // 3. Profiles table check karo (Yahan se resume_url nikal diya taaki conflict na ho)
                 console.log("📡 DEBUG 6: hitting query to profiles table...");
                 const { data: profilesData, error: profilesError } = await supabase
                     .from('profiles')
-                    .select('id, full_name, skills, email, avatar_url')
+                    .select('id, full_name, skills, email, avatar_url') 
                     .in('id', applicantIds);
 
-                console.log("📊 DEBUG 7: Profiles table's raw data ->", profilesData);
+                console.log("📊 DEBUG 7: Profiles table's raw data directly from Supabase ->", profilesData);
                 if (profilesError) {
                     console.error("🚨 DEBUG ERROR (Profiles Fetch):", profilesError.message);
                 }
@@ -72,6 +72,14 @@ const GigApplications = () => {
                 // 4. Combine process check karo
                 const combinedData = appsData.map(app => {
                     const studentProfile = profilesData?.find(p => p.id === app.applicant_id);
+                    
+                    // 🔥 Individual logic log updated: Ab hum check kar rahe hain application ke andar ka unique resume
+                    console.log(`🔍 DEBUG PROFILE CHECK for ${studentProfile?.full_name || 'Unknown'}:`, {
+                        id: studentProfile?.id,
+                        has_resume_url: 'resume_url' in app,
+                        resume_url_value: app.resume_url // 🟢 Profile ki jagah Application se check ho raha hai
+                    });
+
                     return {
                         ...app,
                         profiles: studentProfile || null
@@ -139,9 +147,6 @@ const GigApplications = () => {
                 showNotification(`✕ Application from ${applicantName.toUpperCase()} has been archived.`, "info");
             }
 
-            // Auto hide notification banner after 3 seconds
-            // setTimeout(() => showNotification('', ''), 3000);
-
             console.log(`✅ UI STATE SYNCED: Application ${applicationId} successfully updated to ${newStatus}`);
 
         } catch (err) {
@@ -162,7 +167,7 @@ const GigApplications = () => {
             <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[150] w-full max-w-md px-4 pointer-events-none">
                 <div className={`p-4 rounded-2xl border text-xs font-black tracking-wider text-center pointer-events-auto shadow-2xl backdrop-blur-xl transition-all duration-500 ease-in-out transform ${isVisible && message.text
                         ? 'opacity-100 translate-y-0 scale-100 visible'
-                        : 'opacity-0 translate-y-4 scale-95 invisible' // 👈 Ab transition 100% force hoga
+                        : 'opacity-0 translate-y-4 scale-95 invisible' 
                     } ${message.type === 'error'
                         ? 'bg-red-500/10 border-red-500/20 text-red-400 shadow-[0_0_25px_rgba(239,68,68,0.15)]'
                         : message.type === 'info'
@@ -213,6 +218,24 @@ const GigApplications = () => {
                                 <div className="flex items-center gap-2 text-xs text-slate-400 bg-white/[0.02] border border-white/5 p-2.5 rounded-xl mb-4 shadow-inner">
                                     <Mail size={14} className="text-slate-500" />
                                     <span className="truncate">{app.profiles?.email}</span>
+                                </div>
+
+                                <div className="mb-4">
+                                    {/* 🟢 FIXED: Ab hum global profile ki jagah is specific application table ka unique 'resume_url' check kar rhe hain */}
+                                    {app.resume_url ? (
+                                        <a
+                                            href={app.resume_url} // 🟢 FIXED: Directed to app.resume_url
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full py-2.5 bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-500/20 text-[11px] font-black uppercase tracking-wider rounded-xl flex items-center justify-center gap-1.5 transition-all duration-300"
+                                        >
+                                            View Candidate Resume
+                                        </a>
+                                    ) : (
+                                        <div className="w-full py-2.5 bg-white/[0.01] border border-white/5 border-dashed text-[11px] font-bold text-slate-600 uppercase tracking-wider rounded-xl text-center italic">
+                                            No Resume Uploaded
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="mb-6">
